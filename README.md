@@ -15,7 +15,11 @@ We shall be adopting the KISS approach to building things. I mean how hard is pa
 
 ## Threat Modeling
 
+![Oh hello](img/architecture2.png)
+
 I'm sure no-one will dare to attack this, but just in case, we shall be performing a threat modeling exercise so we understand the threats and code appropriate countermeasures. 
+
+![Oh hello](img/threats.png)
 
 ## Disclaimer
 
