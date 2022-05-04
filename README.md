@@ -12,6 +12,16 @@ Archibald is my attempt at learning Rust and writing a HTTP 1.1 web server.
 
 We shall be adopting the KISS approach to building things. I mean how hard is parsing modern web languages and content? 
 
+
+## Threat Modeling
+
+![Oh hello](img/architecture2.png)
+
+I'm sure no-one will dare to attack this, but just in case, we shall be performing a threat modeling exercise so we understand the threats and code appropriate countermeasures. 
+
+![Oh hello](img/threats.png)
+
+
 ## How Does HTTP Actually Work?
 
 For those who aren't aware, Hypertext Transfer Protocol (HTTP) is a [layer 7](https://en.wikipedia.org/wiki/OSI_model) (application) protocol. The whole thing works by requests and responses, the latter being accepted by a server, which provides the answer. HTTP is stateless and this makes it more fun in a way. 
@@ -62,15 +72,57 @@ HTTP/1.0 (Protocol Version)
 400 (Status Code)
 Bad Request (Status Message)
 
-When building a server, it's important to know how this all works. 
+We need to model the data and understand how best to handle said data. 
+Using the above requests and responses, the data we should expect from a client is:
 
-## Threat Modeling
+```
+GET /user/ID/7 HTTP/1.1\r\n
+Host: nsa.gov
+User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.1; en-US; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 (.NET CLR 3.5.30729)
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-us,en;q=0.5
+Accept-Encoding: gzip,deflate
+```
 
-![Oh hello](img/architecture2.png)
+In order to accept and process the request (the GET method), we'd need to store this into a struct of sorts and using the above method, path, protocol, status code, status message, it should handle it properly and in a secure way. 
 
-I'm sure no-one will dare to attack this, but just in case, we shall be performing a threat modeling exercise so we understand the threats and code appropriate countermeasures. 
+This might look like:
 
-![Oh hello](img/threats.png)
+```
+struct Request {
+    // We need to store the request body
+    method: String,
+    query: String,
+    path: String,
+    body: String,
+    statuscode: u16,
+    statusmessage: String,
+}
+```
+
+The above looks good but actually could introduce a bug, for example the HTTP method option could be abused to include payloads other than POST, GET, PUT, PATCH, OPTIONS and DELETE. This needs to be taken into account when designing this struct. 
+
+Digging into Rust's capability, it looks like we can solve this by using the [enum](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html) function.
+
+```
+enum Allowedmethods {
+    GET,
+    POST,
+    PUT,
+    DELETE,
+    HEAD,
+    OPTIONS,
+    PATCH,
+    TRACE,
+    CONNECT,
+}
+```
+
+The pentesters reading this will probably be screaming at me for including OPTIONS and TRACE, but hey you need report fodder right? 
+
+But what happens when someone decides to break the rules and not supply any query string? what sick bastard would do that right?
+
+Normally you would use a NULL but Rust doesn't have that but does have an enum called Option, which can encode the concept of a value being present or absent. Without this, it would probably lead to a [Null-pointer](https://owasp.org/www-community/vulnerabilities/Null_Dereference) dereference vulnerability of sorts. 
 
 ## Disclaimer
 
