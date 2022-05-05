@@ -5,6 +5,7 @@
 *
 */
 
+use crate::http::methods::Allowedmethods;
 pub struct Request {
     // We need to store the request body
     method: Allowedmethods,

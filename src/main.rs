@@ -29,24 +29,4 @@ fn main() {
 // In order to accept and process incoming requests, we need to store them somewhere.
 // For this we can use a struct
 
-struct Request {
-    // We need to store the request body
-    method: Allowedmethods,
-    query: Option<String>, // This is a string that can be None
-    path: String,
-    body: String,
-    statuscode: u16,
-    statusmessage: String,
-}
 
-enum Allowedmethods {
-    GET,
-    POST,
-    PUT,
-    DELETE,
-    HEAD,
-    OPTIONS,
-    PATCH,
-    TRACE,
-    CONNECT,
-}
