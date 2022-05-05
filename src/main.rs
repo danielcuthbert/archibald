@@ -17,7 +17,7 @@ fn main() {
     // We need to tell it what to listen on. We'll use the default port, but we can change it
     // We should support IPv6 and IPv4 at the same time. We'll use the default IPv4 for now
     // we need to convert the ip/port to a string
-    let archibald = Server::new("0.0.0.0:80".to_string());
+    let archibald = Server::new("127.0.0.1:8080".to_string());
     // Tell the server what HTTP methods we want to support
     let get = Allowedmethods::GET;
     let post = Allowedmethods::POST;
@@ -28,5 +28,3 @@ fn main() {
 
 // In order to accept and process incoming requests, we need to store them somewhere.
 // For this we can use a struct
-
-

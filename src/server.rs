@@ -31,8 +31,25 @@ pub mod archibaldserver {
         // self just points to the instance of the struct
         pub fn run(self) {
             use std::net::TcpListener;
-            println!("Starting server on {}", self.address);
-            let listener = TcpListener::bind(&self.address); // we need to pass a ref otherwise we wont be able to use it again
+            println!("[*] Archibald: Starting to serve you on {}", self.address);
+            // If we cannot bind to the supplied address, we will return an unrecoverable error
+            let listener = TcpListener::bind(&self.address).unwrap();
+            // we need a loop to continually listen for requests
+
+            loop {
+                // the listener has an accept method, so we can use this to check for incoming connections.
+                // this could be a DoS condition as the socket will be closed when the value is dropped but what if the client never drops it?
+
+                let incomingresult = listener.accept();
+
+                if incomingresult.is_err() {
+                    // if we cannot accept the connection, we will return an unrecoverable error
+                    println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection");
+                    continue;
+                }
+
+                let (error, _) = incomingresult.unwrap();
+            }
         }
     }
 }
