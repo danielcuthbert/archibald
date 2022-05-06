@@ -1,5 +1,4 @@
 debug/
-target/debug/*
-target/rls/*
+target/
 Cargo.lock
 .DS_Store

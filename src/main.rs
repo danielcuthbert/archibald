@@ -12,6 +12,7 @@ use server::archibaldserver::Server;
 
 mod http;
 mod server;
+
 // Start of the main function
 fn main() {
     // We need to tell it what to listen on. We'll use the default port, but we can change it
