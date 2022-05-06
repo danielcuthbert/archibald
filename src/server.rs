@@ -13,6 +13,8 @@
 // Logging is not implemented yet.
 
 pub mod archibaldserver {
+    use std::stream;
+
     // by default all mods are private so we need to make this public
     pub struct Server {
         // The address we're listening on is stored in a string.
@@ -47,9 +49,12 @@ pub mod archibaldserver {
                     println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection");
                     continue;
                 }
-
-                let (error, _) = incomingresult.unwrap();
+            
+                // Possibly a better way of doing this but for now it works.
+                let (stream, addr) = incomingresult.unwrap();
             }
         }
     }
 }
+
+// End of the server struct.
