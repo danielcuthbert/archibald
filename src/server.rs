@@ -20,6 +20,9 @@ pub mod archibaldserver {
     use std::fmt::Result;
     use std::net::TcpListener;
     use std::io::Read;
+    use std::convert::TryFrom;
+
+    use crate::http::requests::Request;
     //use crate::http::errors;
 
     // by default all mods are private so we need to make this public
@@ -61,12 +64,19 @@ match listener.accept() {
         let request = String::from_utf8(buffer.to_vec()).unwrap();
         // we need to print the request to the console
         println!("[*] Archibald: My Lord, you asked me: {}", request);
-        
+        //using the requests function to parse the request
+        //the buffer doesn't know how to handle the array so adding [..] includes the entire array
+        match Request::try_from(&buffer[..]){
+        Ok(request) => {},
+            Err(e) => {
+                println!("[*] Archibald: {}", e);
     }
     Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
 
 }
             }
+        }
+    }
         }
     }
 }
