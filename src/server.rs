@@ -71,10 +71,9 @@ match listener.accept() {
             Err(e) => {
                 println!("[*] Archibald: {}", e);
     }
+                        }
+                    },
     Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
-
-}
-            }
         }
     }
         }
