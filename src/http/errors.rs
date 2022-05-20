@@ -15,6 +15,7 @@ use::std::fmt::Display;
 use::std::fmt::Result;
 use::std::str::Utf8Error;
 
+#[derive(Debug, Clone, Copy)]
 pub enum ParseError {
 NotFound,
 InvalidRequest,
@@ -30,7 +31,7 @@ InvalidProtocol,
 
 impl Error for ParseError {
     fn description(&self) -> &str {
-        match *self {
+        match self {
             ParseError::NotFound => "Not Found",
             ParseError::InvalidRequest => "Invalid Request",
             ParseError::InvalidMethod => "Invalid Method",
@@ -38,6 +39,7 @@ impl Error for ParseError {
             ParseError::InvalidHeader => "Invalid Header",
             ParseError::InvalidBody => "Invalid Body",
             ParseError::InvalidProtocol => "Invalid Protocol",
+            ParseError::InvalidEncoding => "Invalid encoding"
         }
     }
 }
