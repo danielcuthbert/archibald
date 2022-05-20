@@ -10,9 +10,10 @@
 */
 
 use::std::error::Error;
+use std::fmt;
 use::std::fmt::Display;
 use::std::fmt::Result;
-
+use::std::str::Utf8Error;
 
 pub enum ParseError {
 NotFound,
@@ -40,6 +41,15 @@ impl Error for ParseError {
     }
 }
     
+// Using UTF8 for the errors, we need to wrangle that into our ParseError somehow
+// this function will receive the error as a utf8 as a parameter and then push it into the ParseError enum
+
+impl From<Utf8Error> for ParseError {
+    fn from(_: Utf8Error) -> ParseError {
+        ParseError::InvalidEncoding
+    }
+}
+
 // We need to display the errors. The std crate has a Display trait that we can use to display the errors well
 
 impl Display for ParseError {

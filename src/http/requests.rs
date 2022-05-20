@@ -27,25 +27,48 @@ pub struct Request {
 // https://doc.rust-lang.org/std/convert/trait.From.html
 // Note: This trait must not fail. If the conversion can fail, use TryFrom.
 
-// impl Request {
-//     // If we receive an invalid request, we need to return a 400 Bad Request
-//     fn from_byte_array(buf: &[u8]) -> Result<Self, String>{}
-// }
-
-// We need to create another implementation block for the TryFrom trait
+// example request
+// GET /name?first=Daniel&last=Cuthbert HTTP/1.1 
+// In order to get all of the request, we have to parse it word by word somehow 
 
 // Convert a byte slice to a string
 impl TryFrom<&[u8]> for Request {
-    type Error = String;
+    type Error = ParseError;
     // this is the actual function that does stuff. copied from the docs. 
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
         // We need to match on the results, so use match
-        match str::from_utf8(buf) {
-Ok(request) => {}
-Err(_) => {
-    // We need to return an error if the conversion fails
-    return Err(ParseError::InvalidEncoding);
-        
-        unimplemented!()
+let request = str::from_utf8(buf)?;
+match parse_request(request) {
+    Ok(req) => Ok(req),
+    Err(e) => Err(e),
+}
+    }
+}
+// basically accepts the request, which is a string slice 
+// so get 'method', 'path', 'query', 'body' etc 
+// we need a loop here to get all of the request
+// I don't think this is the best way to do this at all and probably breaks shit
+
+
+fn parse_request(request: &str) -> Option<(&str, &str)>  {
+    let mut iterate = request.chars();
+    loop {
+        let mut current = iterate.next();
+        if current == None {
+            break;
+        }
+        let mut next = iterate.next();
+        if next == None {
+            break;
+        }
+        if current == Some(' ') && next == Some(' ') {
+            break;
+        }
+
+        for d in request.chars() {
+            if d == ' ' {
+                break;
+            }
+        }
     }
 }
