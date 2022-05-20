@@ -23,6 +23,7 @@ InvalidVersion,
 InvalidHeader,
 InvalidBody,
 InvalidProtocol,
+    InvalidEncoding
 }
 
 // We can use the std crate for errors 
