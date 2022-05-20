@@ -15,7 +15,7 @@ use::std::fmt::Display;
 use::std::fmt::Result;
 use::std::str::Utf8Error;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ParseError {
 NotFound,
 InvalidRequest,

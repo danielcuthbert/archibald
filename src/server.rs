@@ -26,6 +26,7 @@ pub mod archibaldserver {
     //use crate::http::errors;
 
     // by default all mods are private so we need to make this public
+    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
     pub struct Server {
         // The address we're listening on is stored in a string.
         address: String,
