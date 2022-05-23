@@ -11,7 +11,7 @@ use crate::http::requests;
 use crate::http::errors::ParseError;
 use std::str;
 
-
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Request {
     // We need to store the request body
     method: Allowedmethods,

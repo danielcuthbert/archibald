@@ -26,6 +26,7 @@ pub mod archibaldserver {
     //use crate::http::errors;
 
     // by default all mods are private so we need to make this public
+    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
     pub struct Server {
         // The address we're listening on is stored in a string.
         address: String,
@@ -34,9 +35,9 @@ pub mod archibaldserver {
     // We need an implementation block to hold the implementation of the Server struct
     // This holds all the functionality we want to use in the server.
     impl Server {
-        pub fn new(address: String) -> Self {
+        pub fn new<T: Into<String>>(address: T) -> Self {
             // We need to return a new Server struct with the address we're listening on
-            Self { address: address }
+            Self { address: address.into() }
         }
         // We now need a run method to start the server.
         // This will be called by the main function.
@@ -71,10 +72,9 @@ match listener.accept() {
             Err(e) => {
                 println!("[*] Archibald: {}", e);
     }
+                        }
+                    },
     Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
-
-}
-            }
         }
     }
         }
