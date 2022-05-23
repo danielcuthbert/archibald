@@ -39,7 +39,18 @@ impl Error for ParseError {
             ParseError::InvalidProtocol => "Invalid Protocol",
         }
     }
-}
+
+    fn cause(&self) -> Option<&dyn Error> {
+        match *self {
+            ParseError::NotFound => None,
+            ParseError::InvalidRequest => None,
+            ParseError::InvalidMethod => None,
+            ParseError::InvalidVersion => None,
+            ParseError::InvalidHeader => None,
+            ParseError::InvalidBody => None,
+            ParseError::InvalidProtocol => None,
+        }
+    }
     
 // Using UTF8 for the errors, we need to wrangle that into our ParseError somehow
 // this function will receive the error as a utf8 as a parameter and then push it into the ParseError enum
