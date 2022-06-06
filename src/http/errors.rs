@@ -24,13 +24,13 @@ InvalidVersion,
 InvalidHeader,
 InvalidBody,
 InvalidProtocol,
-    InvalidEncoding
+InvalidEncoding
 }
 
 // We can use the std crate for errors 
 
-impl Error for ParseError {
-    fn description(&self) -> &str {
+impl fmt::Display for ParseError {
+    fn wah(&self) -> &str {
         match self {
             ParseError::NotFound => "Not Found",
             ParseError::InvalidRequest => "Invalid Request",
@@ -53,6 +53,10 @@ impl Error for ParseError {
             ParseError::InvalidBody => None,
             ParseError::InvalidProtocol => None,
         }
+    }
+
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result {
+        todo!()
     }
     
 // Using UTF8 for the errors, we need to wrangle that into our ParseError somehow
