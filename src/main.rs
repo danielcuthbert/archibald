@@ -20,8 +20,8 @@ fn main() {
     // we need to convert the ip/port to a string
     let archibald = Server::new("127.0.0.1:8080");
     // Tell the server what HTTP methods we want to support
-    let get = Allowedmethods::GET;
-    let post = Allowedmethods::POST;
+    let _get = Allowedmethods::GET;
+    let _post = Allowedmethods::POST;
 
     // Start the server, this will always run
     archibald.run();

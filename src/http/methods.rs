@@ -5,9 +5,9 @@
 *
 */
 
+use std::str::FromStr; // This trait parse a value from a string // This trait is used to display the error
 
-use std::str::FromStr; // This trait parse a value from a string
-
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Allowedmethods {
     GET,
     POST,
@@ -21,7 +21,6 @@ pub enum Allowedmethods {
 }
 
 // This function receives a string that contains the method from the request and we need to convert it
-
 
 impl FromStr for Allowedmethods {
     type Err = MethodError;
@@ -48,6 +47,3 @@ impl FromStr for Allowedmethods {
 // We need a custom error type for the request parser
 
 pub struct MethodError;
-
-
-

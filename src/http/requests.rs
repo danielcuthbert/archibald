@@ -6,121 +6,92 @@
 */
 
 //use crate::http::methods::{Allowedmethods, MethodError};
-use std::convert::TryFrom;
-use crate::http::requests;
-use crate::http::errors::ParseError;
-use std::str;
 use super::methods::{Allowedmethods, MethodError};
+use crate::http::errors::ParseError;
+use crate::http::requests;
+use std::convert::TryFrom;
+use std::str;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Request {
     // We need to store the request body
-    method: Allowedmethods,
     query: Option<String>, // This is a string that can be None
     path: String,
     body: String,
     statuscode: u16,
     statusmessage: String,
+    method: Allowedmethods,
 }
 
-// We need to send back a response to the client 
+// We need to send back a response to the client
 // This will be a byte array to a string
 // https://doc.rust-lang.org/std/convert/trait.From.html
 // Note: This trait must not fail. If the conversion can fail, use TryFrom.
 
 // example request
-// GET /name?first=Daniel&last=Cuthbert HTTP/1.1 
-// In order to get all of the request, we have to parse it word by word somehow 
+// GET /name?first=Daniel&last=Cuthbert HTTP/1.1
+// In order to get all of the request, we have to parse it word by word somehow
 
 // Convert a byte slice to a string
 
 // TryFrom returns a result and this might fail so we can use this to handle errors
 impl TryFrom<&[u8]> for Request {
     type Error = ParseError;
-    // this is the actual function that does stuff. copied from the docs. 
+    // this is the actual function that does stuff. copied from the docs.
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
         // We need to match on the results, so use match
 
-let request = str::from_utf8(buf)?;
-// variable shadowing is where you re-use the same variable name (request) but overwrite it with a different value
-let (method, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
-let (path, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
-let (protocol, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
+        let request: &str = str::from_utf8(buf).map_err(|_| ParseError::InvalidEncoding)?;
+        // variable shadowing is where you re-use the same variable name (request) but overwrite it with a different value
+        let (method, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
+        let (mut path, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
+        let (protocol, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
 
-// We only support HTTP/1.1 right now, so return an error if it's not that
-if protocol != "HTTP/1.1" {
-    return Err(ParseError::InvalidProtocol);
+        // We only support HTTP/1.1 right now, so return an error if it's not that
+        if protocol != "HTTP/1.1" {
+            return Err(ParseError::InvalidProtocol);
+        }
+
+        let method: Allowedmethods = method.parse().map_err(|_| ParseError::InvalidMethod)?;
+        // convets from string to enum type
+        todo!("Please fix this :)");
+        let mut query_string = None;
+        // we want to match on something but not the other variants
+        match path.find('?') {
+            Some(index) => {
+                query_string = Some(path[index + 1..].to_string()); // representing 1 byte after the '?'
+                path = &path[..index]; // representing the path up to the '?'
+            }
+            None => {}
+        }
+        // unimplemented!()
+
+        // we need to return a result, i mean duh
+        // the requests above expects strings it can own i guess but we can't own a string
+        Ok(Self {
+            method: method,
+            query: query_string,
+            path: path.to_string(),
+            body: request.to_string(),
+            statuscode: 200,
+            statusmessage: "OK".to_string(),
+        })
+    }
 }
 
-let method = method.parse()?; // convets from string to enum type
-
-
-// basically accepts the request, which is a string slice 
-// so get 'method', 'path', 'query', 'body' etc 
+// basically accepts the request, which is a string slice
+// so get 'method', 'path', 'query', 'body' etc
 // we need a loop here to get all of the request
 // I don't think this is the best way to do this at all and probably breaks shit
 
-
 // We dont check for carriage returns or newlines here because we're not doing anything with the request body but we should do
-fn parse_request(request: &str) -> Option<(&str, &str)>  {
-//     let mut iterate = request.chars();
-//     loop {
-//         let mut current = iterate.next();
-//         if current == None {
-//             break;
-//         }
-//         let mut next = iterate.next();
-//         if next == None {
-//             break;
-//         }
-//         if current == Some(' ') && next == Some(' ') {
-//             break;
-//         }
-
-//         for d in request.chars() {
-//             if d == ' ' {
-//                 break;
-//             }
-//         }
-//     }
-// }
-
-pub emum ParseError {
-    InvalidRequest,
-    InvalidMethod,
-    InvalidVersion,
-    InvalidHeader,
-    InvalidBody,
-    InvalidProtocol,
-    InvalidEncoding
-}
-
-impl ParseError{
-
-    fn description(&self) -> &str {
-        match self {
-            ParseError::InvalidRequest => "Invalid Request",
-            ParseError::InvalidMethod => "Invalid Method",
-            ParseError::InvalidVersion => "Invalid Version",
-            ParseError::InvalidHeader => "Invalid Header",
-            ParseError::InvalidBody => "Invalid Body",
-            ParseError::InvalidProtocol => "Invalid Protocol",
-            ParseError::InvalidEncoding => "Invalid encoding"
+fn parse_request(request: &str) -> Option<(&str, &str)> {
+    // todo!("I really need to do something here")
+    // Take the request and string and then add 1 to the index to get the next character
+    for (i, c) in request.chars().enumerate() {
+        if c == ' ' || c == '\r' {
+            return Some((&request[..i], &request[i + 1..]));
         }
     }
-
-}
-
-impl From<Utf8Error> for ParseError {
-    fn from(_: Utf8Error) -> ParseError {
-        ParseError::InvalidEncoding
-    }
-}
-
-impl From<MethodError> for ParseError {
-    fn from(_: MethodError) -> ParseError {
-        ParseError::InvalidMethod
-    }
-}
-
+    None
 }

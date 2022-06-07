@@ -9,56 +9,24 @@
 * Rust uses enum for recoverable errors
 */
 
-use::std::error::Error;
+use ::std::error::Error;
+use ::std::fmt::Display;
+use ::std::fmt::Result;
+use ::std::str::Utf8Error;
 use std::fmt;
-use::std::fmt::Display;
-use::std::fmt::Result;
-use::std::str::Utf8Error;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ParseError {
-NotFound,
-InvalidRequest,
-InvalidMethod,
-InvalidVersion,
-InvalidHeader,
-InvalidBody,
-InvalidProtocol,
-InvalidEncoding
+    NotFound,
+    InvalidRequest,
+    InvalidMethod,
+    InvalidVersion,
+    InvalidHeader,
+    InvalidBody,
+    InvalidProtocol,
+    InvalidEncoding,
 }
 
-// We can use the std crate for errors 
-
-impl fmt::Display for ParseError {
-    fn wah(&self) -> &str {
-        match self {
-            ParseError::NotFound => "Not Found",
-            ParseError::InvalidRequest => "Invalid Request",
-            ParseError::InvalidMethod => "Invalid Method",
-            ParseError::InvalidVersion => "Invalid Version",
-            ParseError::InvalidHeader => "Invalid Header",
-            ParseError::InvalidBody => "Invalid Body",
-            ParseError::InvalidProtocol => "Invalid Protocol",
-            ParseError::InvalidEncoding => "Invalid encoding"
-        }
-    }
-
-    fn cause(&self) -> Option<&dyn Error> {
-        match *self {
-            ParseError::NotFound => None,
-            ParseError::InvalidRequest => None,
-            ParseError::InvalidMethod => None,
-            ParseError::InvalidVersion => None,
-            ParseError::InvalidHeader => None,
-            ParseError::InvalidBody => None,
-            ParseError::InvalidProtocol => None,
-        }
-    }
-
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result {
-        todo!()
-    }
-    
 // Using UTF8 for the errors, we need to wrangle that into our ParseError somehow
 // this function will receive the error as a utf8 as a parameter and then push it into the ParseError enum
 
@@ -73,7 +41,15 @@ impl From<Utf8Error> for ParseError {
 impl Display for ParseError {
     // This is the function that will be called when we print the error
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.description())
+        match self {
+            ParseError::NotFound => write!(f, "Not Found"),
+            ParseError::InvalidRequest => write!(f, "Invalid Request"),
+            ParseError::InvalidMethod => write!(f, "Invalid Method"),
+            ParseError::InvalidVersion => write!(f, "Invalid Version"),
+            ParseError::InvalidHeader => write!(f, "Invalid Header"),
+            ParseError::InvalidBody => write!(f, "Invalid Body"),
+            ParseError::InvalidProtocol => write!(f, "Invalid Protocol"),
+            ParseError::InvalidEncoding => write!(f, "Invalid encoding"),
+        }
     }
 }
-    
