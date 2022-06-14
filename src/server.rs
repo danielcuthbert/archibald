@@ -15,7 +15,7 @@
 pub mod archibaldserver {
 
     use std::convert::TryFrom;
-    use std::fmt::Result;
+
     use std::io::Read;
     use std::net::TcpListener;
 

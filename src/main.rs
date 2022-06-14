@@ -3,11 +3,10 @@
 * Written with love and care
 * Author: @danielcuthbert
 * The corresponding threat model for this can be found in the same repo
-
 */
 
 use http::methods::Allowedmethods;
-use http::requests::Request;
+//use http::requests::Request;
 use server::archibaldserver::Server;
 
 mod http;

@@ -1,30 +1,28 @@
 ![Oh hello](img/isay.png)
 
-# Archibald 
+# Archibald
 
 To be a butler, is to be able to maintain an even-temper, at all times. One must have exceptional personal hygiene and look sharp and professional, always. Even when under stress or scrutiny, a butler must remain calm and lead their team through the difficulties.
 
-Archibald is my attempt at learning Rust and writing a HTTP 1.1 web server. 
+Archibald is my attempt at learning Rust and writing a HTTP 1.1 web server.
 
 ## Architecture
 
 ![](img/architecture.png)
 
-We shall be adopting the KISS approach to building things. I mean how hard is parsing modern web languages and content? 
-
+We shall be adopting the KISS approach to building things. I mean how hard is parsing modern web languages and content?
 
 ## Threat Modeling
 
 ![Oh hello](img/architecture2.png)
 
-I'm sure no-one will dare to attack this, but just in case, we shall be performing a threat modeling exercise so we understand the threats and code appropriate countermeasures. 
+I'm sure no-one will dare to attack this, but just in case, we shall be performing a threat modeling exercise so we understand the threats and code appropriate countermeasures.
 
 ![Oh hello](img/threats.png)
 
-
 ## How Does HTTP Actually Work?
 
-For those who aren't aware, Hypertext Transfer Protocol (HTTP) is a [layer 7](https://en.wikipedia.org/wiki/OSI_model) (application) protocol. The whole thing works by requests and responses, the latter being accepted by a server, which provides the answer. HTTP is stateless and this makes it more fun in a way. 
+For those who aren't aware, Hypertext Transfer Protocol (HTTP) is a [layer 7](https://en.wikipedia.org/wiki/OSI_model) (application) protocol. The whole thing works by requests and responses, the latter being accepted by a server, which provides the answer. HTTP is stateless and this makes it more fun in a way.
 
 It all looks like this:
 
@@ -34,6 +32,7 @@ Notice: Real hostname for nsa.gov [23.63.141.16] is a23-63-141-16.deploy.static.
 nsa.gov [23.63.141.16] 80 (http) open
 GET / HTTP/1.1
 ```
+
 That's connecting to the server, on port 80 and asking for the index. It responds:
 
 ```
@@ -56,6 +55,7 @@ Reference&#32;&#35;9&#46;1ef01602&#46;1651584968&#46;16093878
 Total received bytes: 419
 Total sent bytes: 16
 ```
+
 ### Understanding HTTP Messages
 
 There are two types of HTTP messages, requests and responses, each with its own format.
@@ -72,7 +72,7 @@ HTTP/1.0 (Protocol Version)
 400 (Status Code)
 Bad Request (Status Message)
 
-We need to model the data and understand how best to handle said data. 
+We need to model the data and understand how best to handle said data.
 Using the above requests and responses, the data we should expect from a client is:
 
 ```
@@ -84,7 +84,7 @@ Accept-Language: en-us,en;q=0.5
 Accept-Encoding: gzip,deflate
 ```
 
-In order to accept and process the request (the GET method), we'd need to store this into a struct of sorts and using the above method, path, protocol, status code, status message, it should handle it properly and in a secure way. 
+In order to accept and process the request (the GET method), we'd need to store this into a struct of sorts and using the above method, path, protocol, status code, status message, it should handle it properly and in a secure way.
 
 This might look like:
 
@@ -100,7 +100,7 @@ struct Request {
 }
 ```
 
-The above looks good but actually could introduce a bug, for example the HTTP method option could be abused to include payloads other than POST, GET, PUT, PATCH, OPTIONS and DELETE. This needs to be taken into account when designing this struct. 
+The above looks good but actually could introduce a bug, for example the HTTP method option could be abused to include payloads other than POST, GET, PUT, PATCH, OPTIONS and DELETE. This needs to be taken into account when designing this struct.
 
 Digging into Rust's capability, it looks like we can solve this by using the [enum](https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html) function.
 
@@ -118,12 +118,21 @@ enum Allowedmethods {
 }
 ```
 
-The pentesters reading this will probably be screaming at me for including OPTIONS and TRACE, but hey you need report fodder right? 
+The pentesters reading this will probably be screaming at me for including OPTIONS and TRACE, but hey you need report fodder right?
 
 But what happens when someone decides to break the rules and not supply any query string? what sick bastard would do that right?
 
-Normally you would use a NULL but Rust doesn't have that but does have an enum called Option, which can encode the concept of a value being present or absent. Without this, it would probably lead to a [Null-pointer](https://owasp.org/www-community/vulnerabilities/Null_Dereference) dereference vulnerability of sorts. 
+Normally you would use a NULL but Rust doesn't have that but does have an enum called Option, which can encode the concept of a value being present or absent. Without this, it would probably lead to a [Null-pointer](https://owasp.org/www-community/vulnerabilities/Null_Dereference) dereference vulnerability of sorts.
 
 ## Disclaimer
 
-This will not be production ready, it might eat your children and cause you to like Lotus Notes. I'm not professing to be an expert in Rust and therefore treat this as pretty dodgy. 
+This will not be production ready, it might eat your children and cause you to like Lotus Notes. I'm not professing to be an expert in Rust and therefore treat this as pretty dodgy.
+
+## ToDo
+
+There is a lot still that needs doing. Currently the server runs and listens on a port but thats where the fun ends. Here's my roadmap:
+
+1: Respond to requests from clients by looking for a default index.html file in the predefined web root or resource being requested.
+2: Correctly validate incoming requests using the validation.rs function.
+3: Implement correct logging for debugging, audit and analysis.
+4: Read configuration files for startup, such as what webroot etc. We can borrow the NGINX format here.

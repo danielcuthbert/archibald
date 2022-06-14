@@ -3,20 +3,22 @@
 * Main requests module
 * Author: @danielcuthbert
 *
+* This code serves as the request and response function.
 */
 
-//use crate::http::methods::{Allowedmethods, MethodError};
 use super::methods::{Allowedmethods, MethodError};
 use crate::http::errors::ParseError;
-use crate::http::requests;
+//use crate::http::requests;
 use std::convert::TryFrom;
 use std::str;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-pub struct Request {
-    // We need to store the request body
-    query: Option<String>, // This is a string that can be None
-    path: String,
+
+// This function stores the request body we will use
+
+pub struct Request<'a> {
+    query: Option<&'a String>, // This is a string that can be None
+    path: &'a str,
     body: String,
     statuscode: u16,
     statusmessage: String,
@@ -35,7 +37,7 @@ pub struct Request {
 // Convert a byte slice to a string
 
 // TryFrom returns a result and this might fail so we can use this to handle errors
-impl TryFrom<&[u8]> for Request {
+impl TryFrom<&[u8]> for Request<'_> {
     type Error = ParseError;
     // this is the actual function that does stuff. copied from the docs.
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
@@ -55,11 +57,13 @@ impl TryFrom<&[u8]> for Request {
         let method: Allowedmethods = method.parse().map_err(|_| ParseError::InvalidMethod)?;
         // convets from string to enum type
         todo!("Please fix this :)");
-        let mut query_string = None;
+
+        let Some(&(mut String)) = None;
+
         // we want to match on something but not the other variants
         match path.find('?') {
             Some(index) => {
-                query_string = Some(path[index + 1..].to_string()); // representing 1 byte after the '?'
+                let &String = &Some(path[index + 1..].to_string()); // representing 1 byte after the '?'
                 path = &path[..index]; // representing the path up to the '?'
             }
             None => {}
@@ -70,8 +74,8 @@ impl TryFrom<&[u8]> for Request {
         // the requests above expects strings it can own i guess but we can't own a string
         Ok(Self {
             method: method,
-            query: query_string,
-            path: path.to_string(),
+            query: std::option::Option::None,
+            path: &path.to_string(),
             body: request.to_string(),
             statuscode: 200,
             statusmessage: "OK".to_string(),
