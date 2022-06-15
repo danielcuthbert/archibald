@@ -5,4 +5,5 @@ use std::fmt::Display;
 pub mod errors;
 pub mod logging;
 pub mod methods;
+pub mod query_string;
 pub mod requests;
