@@ -13,13 +13,12 @@ use super::{QueryString, ValueofQueryString};
 use std::convert::TryFrom;
 use std::str;
 
-#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
-
 // This function stores the request body we will use
 
-pub struct Request<'a> {
-    query: Option<QueryString<'a>>, // This is a string that can be None
-    path: &'a str,
+#[derive(Debug)]
+pub struct Request {
+    query: Option<QueryString>, // This is a string that can be None
+    path: String,
     body: String,
     statuscode: u16,
     statusmessage: String,
@@ -38,7 +37,7 @@ pub struct Request<'a> {
 // Convert a byte slice to a string
 
 // TryFrom returns a result and this might fail so we can use this to handle errors
-impl TryFrom<&[u8]> for Request<'_> {
+impl TryFrom<&[u8]> for Request {
     type Error = ParseError;
     // this is the actual function that does stuff. copied from the docs.
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
@@ -64,7 +63,7 @@ impl TryFrom<&[u8]> for Request<'_> {
         // we want to match on something but not the other variants
         match path.find('?') {
             Some(index) => {
-                let &String = &Some(QueryString::from(&path[index + 1..])); // representing 1 byte after the '?'
+                let query = Some(QueryString::from(&path[index + 1..])); // representing 1 byte after the '?'
                 path = &path[..index]; // representing the path up to the '?'
             }
             None => {}
@@ -76,7 +75,7 @@ impl TryFrom<&[u8]> for Request<'_> {
         Ok(Self {
             method: method,
             query: std::option::Option::None,
-            path: &path.to_string(),
+            path: path.to_string(),
             body: request.to_string(),
             statuscode: 200,
             statusmessage: "OK".to_string(),

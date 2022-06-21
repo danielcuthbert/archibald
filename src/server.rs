@@ -66,7 +66,9 @@ pub mod archibaldserver {
         //using the requests function to parse the request
         //the buffer doesn't know how to handle the array so adding [..] includes the entire array
         match Request::try_from(&buffer[..]){
-        Ok(request) => {},
+        Ok(request) => {
+            dbg!(request);
+        },
             Err(e) => {
                 println!("[*] Archibald: {}", e);
     }
