@@ -9,6 +9,7 @@
 use super::methods::{Allowedmethods, MethodError};
 use crate::http::errors::ParseError;
 //use crate::http::requests;
+use super::{QueryString, ValueofQueryString};
 use std::convert::TryFrom;
 use std::str;
 
@@ -17,7 +18,7 @@ use std::str;
 // This function stores the request body we will use
 
 pub struct Request<'a> {
-    query: Option<&'a String>, // This is a string that can be None
+    query: Option<QueryString<'a>>, // This is a string that can be None
     path: &'a str,
     body: String,
     statuscode: u16,
@@ -56,14 +57,14 @@ impl TryFrom<&[u8]> for Request<'_> {
 
         let method: Allowedmethods = method.parse().map_err(|_| ParseError::InvalidMethod)?;
         // convets from string to enum type
-        todo!("Please fix this :)");
+        //todo!("Please fix this :)");
 
-        let Some(&(mut String)) = None;
+        let query: Option<&str> = None;
 
         // we want to match on something but not the other variants
         match path.find('?') {
             Some(index) => {
-                let &String = &Some(path[index + 1..].to_string()); // representing 1 byte after the '?'
+                let &String = &Some(QueryString::from(&path[index + 1..])); // representing 1 byte after the '?'
                 path = &path[..index]; // representing the path up to the '?'
             }
             None => {}
