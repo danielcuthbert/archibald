@@ -3,7 +3,7 @@
 * Main requests module
 * Author: @danielcuthbert
 *
-* This code serves as the request and response function.
+* This code serves as the request function.
 */
 
 use super::methods::{Allowedmethods, MethodError};

@@ -8,3 +8,5 @@ pub mod methods;
 pub mod query_string;
 pub mod requests;
 pub use query_string::{QueryString, Value as ValueofQueryString};
+pub mod response;
+pub use response::Response;
