@@ -7,6 +7,9 @@
 */
 
 // We define a struct to hold all the data we need to send back to the client
+use super::StatusCode;
+
+#[derive(Debug)]
 pub struct Response {
     pub statuscode: u16,
     pub statusmessage: String,
