@@ -16,10 +16,11 @@ pub mod archibaldserver {
 
     use std::convert::TryFrom;
 
-    use std::io::Read;
+    use crate::http::{requests::Request, Response, StatusCode};
+    use std::fmt::write;
+    use std::io::{Read, Write};
     use std::net::TcpListener;
 
-    use crate::http::requests::Request;
     //use crate::http::errors;
 
     // by default all mods are private so we need to make this public
@@ -68,9 +69,20 @@ pub mod archibaldserver {
         match Request::try_from(&buffer[..]){
         Ok(request) => {
             dbg!(request);
+            let response = Response::new(
+                StatusCode::OK,
+                Some("<h2>OK</h2>".to_string()),
+                None);
+        
+            // write!(stream, "HTTP/1.1 404 Not Found\r\n\r\n");
+            response.send(&mut stream).unwrap();
         },
             Err(e) => {
                 println!("[*] Archibald: {}", e);
+                Response::new(
+                    StatusCode::BAD_REQUEST,
+                    Some("<h2>Oh I say!!</h2>".to_string()),
+                    None).send(&mut stream).unwrap();
     }
                         }
                     },

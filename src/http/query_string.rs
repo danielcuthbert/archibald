@@ -49,6 +49,7 @@ impl From<&str> for QueryString {
             let mut pair = query_string.split('=');
             let key = pair.next().unwrap();
             let value = pair.next().unwrap();
+            println!("{} == {}", key, value);
             //s.find('=').unwrap(); // this looks for any use of an = sign in the query string
             qs.data.insert(key.to_string(), value.to_string());
         });

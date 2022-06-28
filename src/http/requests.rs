@@ -58,12 +58,13 @@ impl TryFrom<&[u8]> for Request {
         // convets from string to enum type
         //todo!("Please fix this :)");
 
-        let query: Option<&str> = None;
-
+        let query_str: Option<&str> = None;
+        let mut query = None;
         // we want to match on something but not the other variants
         match path.find('?') {
             Some(index) => {
-                let query = Some(QueryString::from(&path[index + 1..])); // representing 1 byte after the '?'
+                query = Some(QueryString::from(&path[index + 1..])); // representing 1 byte after the '?'
+                println!("{:?}", query);
                 path = &path[..index]; // representing the path up to the '?'
             }
             None => {}
@@ -74,7 +75,7 @@ impl TryFrom<&[u8]> for Request {
         // the requests above expects strings it can own i guess but we can't own a string
         Ok(Self {
             method: method,
-            query: std::option::Option::None,
+            query,
             path: path.to_string(),
             body: request.to_string(),
             statuscode: 200,

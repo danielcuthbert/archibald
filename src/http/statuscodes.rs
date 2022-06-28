@@ -12,6 +12,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult}; //renaming result as i 
 // This is where we store all the codes we want to send
 // We have a friend name and then the integer that we can cast using StatusCode as a u16
 #[derive(Debug, Clone, Copy)] // we need this to copy our string and clone it
+#[repr(u16)] //treat all of these as u16s
 pub enum StatusCode {
     OK = 200,
     BAD_REQUEST = 400,
@@ -19,6 +20,12 @@ pub enum StatusCode {
     NOT_FOUND = 404,
     I_AM_A_TEAPOT = 418,
     INTERNAL_SERVER_ERROR = 500,
+}
+
+impl Into<u16> for StatusCode {
+    fn into(self) -> u16 {
+        self as u16
+    }
 }
 
 // I guess we need some method to map these to reasons why the errors are being sent
