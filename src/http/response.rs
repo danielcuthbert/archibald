@@ -18,7 +18,7 @@ use std::{
 pub struct Response {
     // the contents of these 3 fields get copied to new strings on the heap when we create a new response
     pub statuscode: u16,
-    pub statusmessage: String,
+    // pub statusmessage: String,
     pub body: Option<String>, //there might be no body so we can use Option<>
 }
 
@@ -26,21 +26,22 @@ impl Response {
     // here we use a new public function that takes the above struct and returns a string
     pub fn new<T: Into<u16>>(
         statuscode_raw: T,
-        statusmessage_raw: Option<String>,
+        // statusmessage_raw: Option<String>,
         body: Option<String>,
     ) -> Self {
         Response {
             statuscode: statuscode_raw.into(),
-            statusmessage: statusmessage_raw.unwrap_or_default(),
+            // statusmessage: statusmessage_raw.unwrap_or_default(),
             body,
         }
     }
 
-    pub fn send(&self, stream: &mut TcpStream) -> IoResult<()> {
+    // I used TCPstream before but I think it's better to use the Write trait https://doc.rust-lang.org/std/io/trait.Write.html
+    // this way we can send what ever we want and be more generic and not have to worry about the type of data we are sending
+
+    pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
         // write the status line
-        stream.write_all(
-            format!("HTTP/1.1 {} {}\r\n", self.statuscode, self.statusmessage).as_bytes(),
-        )?;
+        stream.write_all(format!("HTTP/1.1 {} \r\n", self.statuscode,).as_bytes())?;
         // write the headers
         stream.write_all(
             format!(
@@ -56,9 +57,3 @@ impl Response {
         Ok(())
     }
 }
-
-// If we want to display responses, we need a display struct
-
-// impl Display for Response {
-//     fn fmt(&self, f: &mut Formatter) -> FmtResult {}
-// }

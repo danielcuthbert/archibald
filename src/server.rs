@@ -8,19 +8,38 @@
 // Start of the server struct. This is the main struct that will be used to run the server.
 // Every file in Rust is treated as a module.
 
-// Todo:
-// TCP socket is not implemented yet. we can use the net module to create a TCP socket.
-// Logging is not implemented yet.
+
+// We want to use custom traits to return a response to the client.
+
+
+
 
 pub mod archibaldserver {
 
+    use crate::http::errors::ParseError;
+    use crate::http::response;
+    use crate::http::{requests::Request, Response, StatusCode};
+ 
     use std::convert::TryFrom;
 
-    use crate::http::{requests::Request, Response, StatusCode};
+    // use crate::http::{requests::Request, Response, StatusCode};
+    
     use std::fmt::write;
     use std::io::{Read, Write};
     use std::net::TcpListener;
 
+    pub trait ServerHandler {
+        fn handle_request(&mut self, request: &Request) -> Response;
+    
+        // we also need a bad request handler here 
+    
+       fn handle_bad_request(&mut self, e: &ParseError) -> Response;
+       println!("Sorry, M'lud, I failed you: {}", e);
+       //Response::new(StatusCode::BadRequest, None)
+    }
+
+
+ 
     //use crate::http::errors;
 
     // by default all mods are private so we need to make this public
@@ -42,7 +61,7 @@ pub mod archibaldserver {
         // We now need a run method to start the server.
         // This will be called by the main function.
         // self just points to the instance of the struct
-        pub fn run(self) {
+        pub fn run(self, mut handler: impl ServerHandler) {
             println!("[*] Archibald: Starting to serve you on {}", self.address);
             // If we cannot bind to the supplied address, we will return an unrecoverable error
             let listener = TcpListener::bind(&self.address).unwrap();
@@ -66,25 +85,20 @@ pub mod archibaldserver {
         println!("[*] Archibald: My Lord, you asked me: {}", request);
         //using the requests function to parse the request
         //the buffer doesn't know how to handle the array so adding [..] includes the entire array
-        match Request::try_from(&buffer[..]){
+        //
+        let response = match Request::try_from(&buffer[..]){
         Ok(request) => {
-            dbg!(request);
-            let response = Response::new(
-                StatusCode::OK,
-                Some("<h2>OK</h2>".to_string()),
-                None);
-        
-            // write!(stream, "HTTP/1.1 404 Not Found\r\n\r\n");
-            response.send(&mut stream).unwrap();
-        },
-            Err(e) => {
-                println!("[*] Archibald: {}", e);
-                Response::new(
-                    StatusCode::BAD_REQUEST,
-                    Some("<h2>Oh I say!!</h2>".to_string()),
-                    None).send(&mut stream).unwrap();
+            let response = match Request::try_from(&buffer[..]) {
+                Ok(request) => {
+                    handler.handle_request(&request)
+                },
+                Err(e) => {
+                    handler.handle_bad_request(&e)},
+            }; 
+            
     }
-                        }
+            Err(_) => todo!(),
+                        };
                     },
     Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
         }

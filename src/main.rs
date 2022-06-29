@@ -7,8 +7,10 @@
 
 use http::methods::Allowedmethods;
 //use http::requests::Request;
+use archibald_handler::ArchibaldHandler;
 use server::archibaldserver::Server;
 
+mod archibald_handler;
 mod http;
 mod server;
 
@@ -23,7 +25,7 @@ fn main() {
     let _post = Allowedmethods::POST;
 
     // Start the server, this will always run
-    archibald.run();
+    archibald.run(ArchibaldHandler);
 }
 
 // In order to accept and process incoming requests, we need to store them somewhere.
