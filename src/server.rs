@@ -34,7 +34,7 @@ pub mod archibaldserver {
         // we also need a bad request handler here 
     
        fn handle_bad_request(&mut self, e: &ParseError) -> Response;
-       println!("Sorry, M'lud, I failed you: {}", e);
+    //    println!("{}", e);
        //Response::new(StatusCode::BadRequest, None)
     }
 
