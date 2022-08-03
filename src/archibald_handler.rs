@@ -31,7 +31,7 @@ impl ServerHandler for ArchibaldHandler {
                 // If the query is None, we return a 404
                 None => Response::new(NOT_FOUND, "Not Found"),
                 // we can also do the stock /
-                "/" => Response::new(statuscodes::OK, "Hello Master, how can I help you?"),
+                "/" => Response::new(statuscodes::OK, "Hello World"),
                 // If the query is Some, we return the query
                 Some(query) => Response::new(statuscodes::OK, Some(query.to_string())),
             },
