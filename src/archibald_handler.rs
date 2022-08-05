@@ -51,9 +51,13 @@ impl ServerHandler for ArchibaldHandler {
             Allowedmethods::GET => match request.path() {
                 // If the path is /, we want to return a simple string
                 "/" => Response::new(JollyGood, self.read_file("index.html")),
-                _ => Response::new(NotFound, Some("Not Found".to_string())),
+
+                path => match self.read_file(path) {
+                    Some(content) => Response::new(JollyGood, Some(content)),
+                    None => Response::new(NotFound, None),
+                },
             },
-            // If the query is None, we return a 404 error
+            // When we dont have a mapping, we return a 404
             _ => Response::new(NotFound, Some("Not Found".to_string())),
         }
     }
