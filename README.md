@@ -132,7 +132,7 @@ This will not be production ready, it might eat your children and cause you to l
 
 There is a lot still that needs doing. Currently the server runs and listens on a port but thats where the fun ends. Here's my roadmap:
 
-1: Respond to requests from clients by looking for a default index.html file in the predefined web root or resource being requested.
-2: Correctly validate incoming requests using the validation.rs function.
-3: Implement correct logging for debugging, audit and analysis.
-4: Read configuration files for startup, such as what webroot etc. We can borrow the NGINX format here.
+1. ~~Respond to requests from clients by looking for a default index.html file in the predefined web root or resource being requested.~~
+2. Correctly validate incoming requests using the validation.rs function.
+3. Implement correct logging for debugging, audit and analysis.
+4. Read configuration files for startup, such as what webroot etc. We can borrow the NGINX format here.
