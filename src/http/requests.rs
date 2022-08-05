@@ -16,9 +16,9 @@ use std::str;
 // This function stores the request body we will use
 
 #[derive(Debug)]
-pub struct Request<'buf> {
+pub struct Request {
     query: Option<QueryString>, // This is a string that can be None
-    path: &'buf String,
+    path: String,
     body: String,
     statuscode: u16,
     statusmessage: String,
@@ -34,7 +34,7 @@ pub struct Request<'buf> {
 // GET /name?first=Daniel&last=Cuthbert HTTP/1.1
 // In order to get all of the request, we have to parse it word by word somehow
 
-impl<'buf> Request<'buf> {
+impl Request {
     pub fn path(&self) -> &str {
         &self.path
     }
@@ -48,7 +48,7 @@ impl<'buf> Request<'buf> {
 }
 
 // TryFrom returns a result and this might fail so we can use this to handle errors
-impl TryFrom<&[u8]> for Request<'_> {
+impl TryFrom<&[u8]> for Request {
     type Error = ParseError;
     // this is the actual function that does stuff. copied from the docs.
     fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {

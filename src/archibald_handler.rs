@@ -7,16 +7,16 @@
 
 // use crate::http::statuscodes;
 
-use response::Response;
-
+use crate::http::methods::Allowedmethods;
 use crate::http::requests::Request;
+use response::Response;
 
 // We make use of a Archibald Handler
 use super::http::{methods, requests, response, statuscodes};
 // use super::http::response::Response;
 // use super::http::Methods;
 // use super::http::StatusCode;
-use super::http::StatusCode::NOT_FOUND;
+use super::http::statuscodes::StatusCode::{JollyGood, NotFound};
 use super::server::archibaldserver::ServerHandler;
 
 // this is the main handler module
@@ -25,16 +25,16 @@ pub struct ArchibaldHandler;
 impl ServerHandler for ArchibaldHandler {
     // this handles the request
     fn handle_request(&mut self, request: &Request) -> Response {
+        println!("METHOD {:?} PATH '{}'", request.method(), request.path());
         match request.method() {
-            // We need to handle GET requests
-            Method::GET => match request.path() {
-                // If the query is None, we return a 404
-                None => Response::new(NOT_FOUND, "Not Found"),
-                // we can also do the stock /
-                "/" => Response::new(statuscodes::OK, "Hello World"),
-                // If the query is Some, we return the query
-                Some(query) => Response::new(statuscodes::OK, Some(query.to_string())),
+            // We need to handle the requests depending on what they are. This is where we do that.
+            Allowedmethods::GET => match request.path() {
+                // If the path is /, we want to return a simple string
+                "/" => Response::new(JollyGood, Some("I say old boy!!".to_string())),
+                _ => Response::new(NotFound, Some("Not Found".to_string())),
             },
+            // If the query is None, we return a 404 error
+            _ => Response::new(NotFound, Some("Not Found".to_string())),
         }
     }
 

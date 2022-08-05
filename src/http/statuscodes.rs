@@ -14,12 +14,12 @@ use std::fmt::{Display, Formatter, Result as FmtResult}; //renaming result as i 
 #[derive(Debug, Clone, Copy)] // we need this to copy our string and clone it
 #[repr(u16)] //treat all of these as u16s
 pub enum StatusCode {
-    OK = 200,
-    BAD_REQUEST = 400,
+    JollyGood = 200,
+    BadRequest = 400,
     FORBIDDEN = 403,
-    NOT_FOUND = 404,
-    I_AM_A_TEAPOT = 418,
-    INTERNAL_SERVER_ERROR = 500,
+    NotFound = 404,
+    IAmATeapot = 418,
+    InternalServerError = 500,
 }
 
 impl Into<u16> for StatusCode {
@@ -34,12 +34,12 @@ impl StatusCode {
     pub fn http_status_reason_phrase(&self) -> &str {
         match self {
             // self is a receiver of a method so we can just match on it
-            Self::OK => "OK",
-            Self::BAD_REQUEST => "Bad Request",
+            Self::JollyGood => "Jolly Good",
+            Self::BadRequest => "Bad Request",
             Self::FORBIDDEN => "Forbidden",
-            Self::NOT_FOUND => "Not Found",
-            Self::I_AM_A_TEAPOT => "I am a teapot",
-            Self::INTERNAL_SERVER_ERROR => "Internal Server Error",
+            Self::NotFound => "Not Found",
+            Self::IAmATeapot => "I am a teapot",
+            Self::InternalServerError => "Internal Server Error",
         }
     }
 }
