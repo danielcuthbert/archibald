@@ -36,9 +36,27 @@ impl ArchibaldHandler {
         }
     }
 
+    // This is where we could introduce an ugly vulnerability called directory traversal if we do not validate properly.
+    // What we need to do is check that the path is the absolute path to the static_files directory.
+    // the file_path is provided by the request and is possibly malicious.
     fn read_file(&self, file_path: &str) -> Option<String> {
-        let path = format!("{}/{}", self.static_path, file_path); // reads the public path
-        fs::read_to_string(path).ok() //this will read the file and if there is an error tell us about it. ok() looks at the result and if good converts the value into an option
+        let path = format!("{}/{}", self.static_path, file_path); // reads the public path. This is actually a vulnerability if we dont check the path
+                                                                  // we can use the fs::canonicalize function to get the absolute path and remove the .. ../
+        match fs::canonicalize(path) {
+            Ok(path) => {
+                // if the path is valid (exists) and is the static_path we defined, then we can read the file
+                if path.starts_with(&self.static_path) {
+                    fs::read_to_string(path).ok()
+                } else {
+                    println!(
+                        "I say old boy, what are you doing?. This looks like an attack: {}",
+                        file_path
+                    );
+                    return None;
+                }
+            }
+            Err(_) => None,
+        }
     }
 }
 
