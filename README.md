@@ -136,3 +136,5 @@ There is a lot still that needs doing. Currently the server runs and listens on 
 2. Correctly validate incoming requests using the validation.rs function.
 3. Implement correct logging for debugging, audit and analysis.
 4. Read configuration files for startup, such as what webroot etc. We can borrow the NGINX format here.
+5. We are currently a single-thread butler. That isn't good so we should have many and std::thread could help here.
+6. We do nothing with headers in both the requests.rs or the response.rs

@@ -10,6 +10,7 @@ use super::methods::{Allowedmethods, MethodError};
 use crate::http::errors::ParseError;
 //use crate::http::requests;
 use super::{QueryString, ValueofQueryString};
+use log::{debug, error, info, trace, warn};
 use std::convert::TryFrom;
 use std::str;
 
@@ -62,7 +63,8 @@ impl TryFrom<&[u8]> for Request {
 
         // We only support HTTP/1.1 right now, so return an error if it's not that
         if protocol != "HTTP/1.1" {
-            return Err(ParseError::InvalidProtocol);
+            //return Err(ParseError::InvalidProtocol);
+            error!("[*] Archibald: Invalid protocol: {}", protocol);
         }
 
         let method: Allowedmethods = method.parse().map_err(|_| ParseError::InvalidMethod)?;
