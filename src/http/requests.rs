@@ -12,8 +12,10 @@ use crate::http::errors::ParseError;
 use super::{QueryString, ValueofQueryString};
 use log::{debug, error, info, trace, warn};
 use std::convert::TryFrom;
-use std::str;
+use std::error::Error;
+use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 
+use std::str;
 // This function stores the request body we will use
 
 #[derive(Debug)]
@@ -81,20 +83,41 @@ impl TryFrom<&[u8]> for Request {
             }
             None => {}
         }
-        // unimplemented!()
 
-        // we need to return a result, i mean duh
-        // the requests above expects strings it can own i guess but we can't own a string
-        Ok(Self {
-            method: method,
-            query,
-            path: path.to_string(),
-            body: request.to_string(),
-            statuscode: 200,
-            statusmessage: "OK".to_string(),
-        })
+        // Use fmt::display for parse errors
+        // https://doc.rust-lang.org/std/fmt/trait.Display.html
+        impl Display for ParseError {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> FmtResult {
+                write!(f, "ParseError: {}", self.description())
+            }
+        }
+
+        impl Debug for ParseError {
+            fn fmt(&self, f: &mut std::fmt::Formatter) -> FmtResult {
+                write!(f, "ParseError: {}", self.description())
+            }
+        }
+        // This represents how we handle different error messages
+        pub enum ParseError {
+            InvalidRequest,  // This is the error that is returned if the request is invalid
+            InvalidEncoding, // This is the error that is returned if the encoding is invalid
+            InvalidProtocol, // This is the error that is returned if the protocol is invalid
+            InvalidMethod,   // This is the error that is returned if the method is invalid
+        }
+        // Now we need to implement this
+        impl ParseError {
+            fn description(&self) -> &str {
+                match self {
+                    Self::InvalidRequest => "Invalid Request",
+                    Self::InvalidEncoding => "Invalid Encoding",
+                    Self::InvalidProtocol => "Invalid Protocol",
+                    Self::InvalidMethod => "Invalid Method",
+                }
+            }
+        }
     }
 }
+impl Error for ParseError {}
 
 // basically accepts the request, which is a string slice
 // so get 'method', 'path', 'query', 'body' etc
