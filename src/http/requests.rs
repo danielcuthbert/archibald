@@ -7,20 +7,19 @@
 */
 
 use super::methods::{Allowedmethods, MethodError};
-use super::{QueryString, ValueofQueryString};
+use super::QueryString;
 use crate::http::errors::ParseError;
-use log::{debug, error, info, trace, warn};
+use core::fmt::Debug;
 use std::convert::TryFrom;
-use std::intrinsics::const_eval_select;
-use std::str;
+
+use std::error::Error;
+use std::fmt::{Display, Formatter};
+use std::str::{self, Utf8Error};
 
 #[derive(Debug)]
-pub struct Request {
-    query: Option<QueryString>, // This is a string that can be None
-    path: String,
-    body: String,
-    statuscode: u16,
-    statusmessage: String,
+pub struct Request<'buf> {
+    path: &'buf str,
+    query_string: Option<QueryString>,
     method: Allowedmethods,
 }
 
@@ -33,7 +32,7 @@ pub struct Request {
 // GET /name?first=Daniel&last=Cuthbert HTTP/1.1
 // In order to get all of the request, we have to parse it word by word somehow
 
-impl Request {
+impl Request<'_> {
     pub fn path(&self) -> &str {
         &self.path
     }
@@ -41,8 +40,8 @@ impl Request {
         &self.method
     }
 
-    pub fn query(&self) -> &Option<QueryString> {
-        &self.query
+    pub fn query_string(&self) -> Option<&QueryString> {
+        self.query_string.as_ref()
     }
 }
 
@@ -50,20 +49,35 @@ impl Request {
 // this bit is frustrating as hell and hurting me more than it should.
 // I know I need to return something but I don't know what
 
-impl TryFrom<&[u8]> for Request {
+impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     type Error = ParseError;
-    fn try_from(buf: &[u8]) -> Result<Self, Self::Error> {
+
+    fn try_from(buf: &'buf [u8]) -> Result<Request<'buf>, Self::Error> {
         let request = str::from_utf8(buf)?;
-        let (method, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
+        let (_method, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
         let (mut path, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
-        let (protocol, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
-        let (statuscode, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
-        let (statusmessage, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
-        let (body, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
+        let (_protocol, _) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
+
+        if _protocol != "HTTP/1.1" {
+            return Err(ParseError::InvalidProtocol);
+        }
+
+        let method: Allowedmethods = _method.parse()?;
+
+        let mut query_string = None;
+        if let Some(i) = path.find('?') {
+            query_string = Some(QueryString::from(&path[i + 1..]));
+            path = &path[..i];
+        }
+
+        Ok(Self {
+            path,
+            query_string,
+            method,
+        })
     }
 }
 
-// We dont check for carriage returns or newlines here because we're not doing anything with the request body but we should do
 fn parse_request(request: &str) -> Option<(&str, &str)> {
     // Take the request and string and then add 1 to the index to get the next character
     for (i, c) in request.chars().enumerate() {

@@ -9,6 +9,8 @@
 
 use crate::http::methods::Allowedmethods;
 use crate::http::requests::Request;
+use crate::http::statuscodes::StatusCode;
+use log::info;
 use response::Response;
 
 // We make use of a Archibald Handler
@@ -63,12 +65,13 @@ impl ArchibaldHandler {
 impl ServerHandler for ArchibaldHandler {
     // this handles the request
     fn handle_request(&mut self, request: &Request) -> Response {
-        println!("METHOD {:?} PATH '{}'", request.method(), request.path());
+        info!("METHOD {:?} PATH '{}'", request.method(), request.path());
         match request.method() {
-            // We need to handle the requests depending on what they are. This is where we do that.
+            // If a GET request is made, we need to check the path and return the appropriate response
             Allowedmethods::GET => match request.path() {
-                // If the path is /, we want to return a simple string
                 "/" => Response::new(JollyGood, self.read_file("index.html")),
+                // This is the default case where if nothing matches, we return a 404
+                _ => Response::new(StatusCode::NotFound, None),
 
                 path => match self.read_file(path) {
                     Some(content) => Response::new(JollyGood, Some(content)),

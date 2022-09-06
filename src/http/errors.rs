@@ -9,9 +9,12 @@
 * Rust uses enum for recoverable errors
 */
 
-use ::std::error::Error;
+use std::error::Error;
+// use ::std::error::Error;
 use std::fmt::{Debug, Display, Result as FmtResult};
 use std::str::Utf8Error;
+
+use super::methods::MethodError;
 
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum ParseError {
@@ -39,6 +42,18 @@ impl Debug for ParseError {
         write!(f, "ParseError: {}", self.description())
     }
 }
+
+impl From<MethodError> for ParseError {
+    fn from(_: MethodError) -> Self {
+        Self::InvalidMethod
+    }
+}
+
+impl From<Utf8Error> for ParseError {
+    fn from(_: Utf8Error) -> Self {
+        Self::InvalidEncoding
+    }
+}
 // This represents how we handle different error messages
 
 // Now we need to implement this
@@ -59,11 +74,5 @@ impl ParseError {
 
 // this is to handle utf8 errors
 // it accepts the utf8 error as a parameter and then pushes it into the ParseError enum
-
-impl From<Utf8Error> for ParseError {
-    fn from(_: Utf8Error) -> Self {
-        ParseError::InvalidEncoding
-    }
-}
 
 impl Error for ParseError {}
