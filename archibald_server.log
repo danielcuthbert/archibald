@@ -1,0 +1,4 @@
+13:48:49 [INFO] STATIC PATH: /Users/daniel/Code/Archibald/static_content
+13:48:57 [INFO] METHOD GET PATH '/'
+13:48:57 [INFO] METHOD GET PATH '/static_content/style.css'
+13:49:01 [INFO] METHOD GET PATH '/fdkjf'
