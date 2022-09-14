@@ -12,8 +12,6 @@
 
 pub mod archibaldserver {
 
-    use log::info;
-
     use crate::http::errors::ParseError;
     use crate::http::response;
     use crate::http::{requests::Request, Response, StatusCode};
@@ -30,10 +28,10 @@ pub mod archibaldserver {
         fn handle_request(&mut self, request: &Request) -> Response;
 
         // we also need a bad request handler here
+
         fn handle_bad_request(&mut self, e: &ParseError) -> Response;
-        println!("Failed to parse request: {}", e);
-        // We need to send a response back to the client
-        //Response::new(StatusCode::BadRequest, Some(e.to_string()));
+        //    println!("{}", e);
+        //Response::new(StatusCode::BadRequest, None)
     }
 
     //use crate::http::errors;
@@ -58,7 +56,7 @@ pub mod archibaldserver {
         // This will be called by the main function.
         // self just points to the instance of the struct
         pub fn run(self, mut handler: impl ServerHandler) {
-            info!("[*] Archibald: Starting to serve you on {}", self.address);
+            println!("[*] Archibald: Starting to serve you on {}", self.address);
             // If we cannot bind to the supplied address, we will return an unrecoverable error
             let listener = TcpListener::bind(&self.address).unwrap();
             // we need a loop to continually listen for requests
@@ -78,7 +76,7 @@ pub mod archibaldserver {
                         // we need to convert the buffer to a string
                         let request = String::from_utf8(buffer.to_vec()).unwrap();
                         // we need to print the request to the console
-                        info!("[*] Archibald: My Lord, you asked me: {}", request);
+                        println!("[*] Archibald: My Lord, you asked me: {}", request);
                         //using the requests function to parse the request
                         //the buffer doesn't know how to handle the array so adding [..] includes the entire array
                         //
@@ -95,7 +93,7 @@ pub mod archibaldserver {
                             Err(_) => todo!(),
                         };
                     },
-                    Err(e) => info!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
+                    Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
                 }
             }
         }
