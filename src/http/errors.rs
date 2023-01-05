@@ -10,35 +10,45 @@
 */
 
 use std::error::Error;
-// use ::std::error::Error;
-use std::fmt::{Debug, Display, Result as FmtResult};
+use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
 use std::str::Utf8Error;
 
 use super::methods::MethodError;
 
-#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[non_exhaustive]
 pub enum ParseError {
-    NotFound,        // This is the error that is returned when the request is not found
-    InvalidRequest,  // This is the error that is returned when the request is invalid
-    InvalidMethod,   // This is the error that is returned when the method is invalid
-    InvalidVersion,  // This is the error that is returned when the version is invalid
-    InvalidHeader,   // This is the error that is returned when the header is invalid
-    InvalidBody,     // This is the error that is returned when the body is invalid
-    InvalidProtocol, // This is the error that is returned when the protocol is invalid
-    InvalidEncoding, // This is the error that is returned when the encoding is invalid
+    /// This is the error that is returned when a number of things go wrong with the HTTP request
+    NotFound(u16),
+    InvalidRequest,
+    InvalidMethod,
+    InvalidHeader,
+    InvalidBody,
+    InvalidEncoding,
+    InvalidProtocol,
 }
 
 // Using UTF8 for the errors, we need to wrangle that into our ParseError somehow
 // this function will receive the error as a utf8 as a parameter and then push it into the ParseError enum
 
 impl Display for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> FmtResult {
-        write!(f, "ParseError: {}", self.description())
+    /// The implementation of the Display trait for the ParseError enum
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
+        use ParseError::*;
+        match self {
+            InvalidRequest => write!(f, "Invalid Request"),
+            InvalidMethod => write!(f, "Invalid Method"),
+            InvalidHeader => write!(f, "Invalid Header"),
+            InvalidBody => write!(f, "Invalid Body"),
+            InvalidEncoding => write!(f, "Invalid Encoding"),
+            NotFound(status) => write!(f, "Not Found: {}", status),
+            InvalidProtocol => write!(f, "Invalid Protocol"),
+        }
     }
+    // write!(f, "ParseError: {}", self.description());
 }
 
 impl Debug for ParseError {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> FmtResult {
+    fn fmt(&self, f: &mut Formatter) -> FmtResult {
         write!(f, "ParseError: {}", self.description())
     }
 }
@@ -56,18 +66,22 @@ impl From<Utf8Error> for ParseError {
 }
 // This represents how we handle different error messages
 
-// Now we need to implement this
 impl ParseError {
     fn description(&self) -> &str {
         match self {
             Self::InvalidRequest => "Invalid Request",
-            Self::InvalidEncoding => "Invalid Encoding",
-            Self::InvalidProtocol => "Invalid Protocol",
             Self::InvalidMethod => "Invalid Method",
             Self::InvalidBody => "Invalid Body",
             Self::InvalidHeader => "Invalid Header",
-            Self::InvalidVersion => "Invalid Version",
-            Self::NotFound => "Not Found",
+            Self::NotFound(_) => "Not Found",
+            Self::InvalidProtocol => "Invalid Protocol",
+            ParseError::NotFound(_) => todo!(),
+            ParseError::InvalidRequest => todo!(),
+            ParseError::InvalidMethod => todo!(),
+            ParseError::InvalidHeader => todo!(),
+            ParseError::InvalidBody => todo!(),
+            ParseError::InvalidEncoding => todo!(),
+            ParseError::InvalidProtocol => todo!(),
         }
     }
 }

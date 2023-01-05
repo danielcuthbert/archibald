@@ -5,13 +5,12 @@
 *
 */
 
-// Start of the server struct. This is the main struct that will be used to run the server.
 // Every file in Rust is treated as a module.
 
 // We want to use custom traits to return a response to the client.
 
 pub mod archibaldserver {
-
+    /// This is the main struct that will be used to run the server.
     use crate::http::errors::ParseError;
     use crate::http::response;
     use crate::http::{requests::Request, Response, StatusCode};
@@ -25,9 +24,10 @@ pub mod archibaldserver {
     use std::net::TcpListener;
 
     pub trait ServerHandler {
+        /// This is the main handler for the server. It will take a request and return a response.
         fn handle_request(&mut self, request: &Request) -> Response;
 
-        // we also need a bad request handler here
+        /// This is the error handler for the server. It will take a request and return a response.
 
         fn handle_bad_request(&mut self, e: &ParseError) -> Response;
         //    println!("{}", e);
@@ -39,13 +39,14 @@ pub mod archibaldserver {
     // by default all mods are private so we need to make this public
     #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
     pub struct Server {
-        // The address we're listening on is stored in a string.
+        /// This is the address we're listening on and it is stored in a string.
         address: String,
     }
 
-    // We need an implementation block to hold the implementation of the Server struct
-    // This holds all the functionality we want to use in the server.
     impl Server {
+        /// We need an implementation block to hold the implementation of the Server struct
+        /// This holds all the functionality we want to use in the server.
+
         pub fn new<T: Into<String>>(address: T) -> Self {
             // We need to return a new Server struct with the address we're listening on
             Self {

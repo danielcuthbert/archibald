@@ -1,12 +1,5 @@
-/*
-* Archibald: a loyal web server
-* Main status codes module
-* Author: @danielcuthbert
-*
-* This code serves as the status codes function.
-* HTTP status codes are cool https://www.restapitutorial.com/httpstatuscodes.html
-*/
-
+/// This is where we store all the codes we want to send
+/// HTTP status codes are cool https://www.restapitutorial.com/httpstatuscodes.html
 use std::fmt::{Display, Formatter, Result as FmtResult}; //renaming result as i mess this up a lot so this makes it easier to find it
 
 // This is where we store all the codes we want to send
@@ -14,6 +7,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult}; //renaming result as i 
 #[derive(Debug, Clone, Copy)] // we need this to copy our string and clone it
 #[repr(u16)] //treat all of these as u16s
 pub enum StatusCode {
+    /// This is where we store all the codes we want to send
     JollyGood = 200,
     BadRequest = 400,
     FORBIDDEN = 403,
@@ -23,6 +17,7 @@ pub enum StatusCode {
 }
 
 impl Into<u16> for StatusCode {
+    /// An implementation of the Into trait for the StatusCode enum
     fn into(self) -> u16 {
         self as u16
     }
@@ -31,6 +26,7 @@ impl Into<u16> for StatusCode {
 // I guess we need some method to map these to reasons why the errors are being sent
 
 impl StatusCode {
+    /// The implementation of the StatusCode enum
     pub fn http_status_reason_phrase(&self) -> &str {
         match self {
             // self is a receiver of a method so we can just match on it
@@ -55,6 +51,7 @@ impl StatusCode {
 // For this, we have to use the clone function
 
 impl Display for StatusCode {
+    /// Here is the implementation of the Display trait for the StatusCode enum
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
         // use self, f to get the type of the struct and then
         write!(f, "{}", *self as u16) // we use write to write to the formatter. This is a format string

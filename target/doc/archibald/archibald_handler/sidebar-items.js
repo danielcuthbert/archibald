@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":[["ArchibaldHandler","this is the main handler module This is for the static_files directory where we serve content from the filesystem."]]};

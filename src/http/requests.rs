@@ -33,6 +33,7 @@ pub struct Request<'buf> {
 // In order to get all of the request, we have to parse it word by word somehow
 
 impl Request<'_> {
+    /// This allows us to create a new request. It makes use of Allowedmethods to check if the method is valid.
     pub fn path(&self) -> &str {
         &self.path
     }
