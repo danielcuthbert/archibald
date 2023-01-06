@@ -35,7 +35,7 @@ impl Response {
     }
 
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
-        /// This allows us to send the response to the client
+        // This allows us to send the response to the client
         let body = match &self.body {
             Some(b) => b,
             None => "",

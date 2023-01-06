@@ -138,3 +138,15 @@ There is a lot still that needs doing. Currently the server runs and listens on 
 4. Read configuration files for startup, such as what webroot etc. We can borrow the NGINX format here.
 5. We are currently a single-thread butler. That isn't good so we should have many and std::thread could help here.
 6. We do nothing with headers in both the requests.rs or the response.rs
+
+### Configuration Files
+
+To make life easier, Archibald reads options from a configuration file. The default configuration file can be found in config/archibald.toml and looks like so:
+
+```
+[config]
+ip = "127.0.0.1"
+port = 8080
+static_path = "/static_content"
+default_path = ""
+```
