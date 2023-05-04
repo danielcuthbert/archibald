@@ -27,9 +27,6 @@ pub enum ParseError {
     InvalidProtocol,
 }
 
-// Using UTF8 for the errors, we need to wrangle that into our ParseError somehow
-// this function will receive the error as a utf8 as a parameter and then push it into the ParseError enum
-
 impl Display for ParseError {
     /// The implementation of the Display trait for the ParseError enum
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
@@ -44,12 +41,11 @@ impl Display for ParseError {
             InvalidProtocol => write!(f, "Invalid Protocol"),
         }
     }
-    // write!(f, "ParseError: {}", self.description());
 }
 
 impl Debug for ParseError {
     fn fmt(&self, f: &mut Formatter) -> FmtResult {
-        write!(f, "ParseError: {}", self.description())
+        write!(f, "ParseError: {}", self)
     }
 }
 
@@ -64,29 +60,5 @@ impl From<Utf8Error> for ParseError {
         Self::InvalidEncoding
     }
 }
-// This represents how we handle different error messages
-
-impl ParseError {
-    fn description(&self) -> &str {
-        match self {
-            Self::InvalidRequest => "Invalid Request",
-            Self::InvalidMethod => "Invalid Method",
-            Self::InvalidBody => "Invalid Body",
-            Self::InvalidHeader => "Invalid Header",
-            Self::NotFound(_) => "Not Found",
-            Self::InvalidProtocol => "Invalid Protocol",
-            ParseError::NotFound(_) => todo!(),
-            ParseError::InvalidRequest => todo!(),
-            ParseError::InvalidMethod => todo!(),
-            ParseError::InvalidHeader => todo!(),
-            ParseError::InvalidBody => todo!(),
-            ParseError::InvalidEncoding => todo!(),
-            ParseError::InvalidProtocol => todo!(),
-        }
-    }
-}
-
-// this is to handle utf8 errors
-// it accepts the utf8 error as a parameter and then pushes it into the ParseError enum
 
 impl Error for ParseError {}
