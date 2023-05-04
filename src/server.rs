@@ -56,48 +56,35 @@ pub mod archibaldserver {
         // We now need a run method to start the server.
         // This will be called by the main function.
         // self just points to the instance of the struct
-        pub fn run(self, mut handler: impl ServerHandler) {
-            println!("[*] Archibald: Starting to serve you on {}", self.address);
-            // If we cannot bind to the supplied address, we will return an unrecoverable error
-            let listener = TcpListener::bind(&self.address).unwrap();
-            // we need a loop to continually listen for requests
+pub fn run(self, mut handler: impl ServerHandler) {
+    println!("[*] Archibald: Starting to serve you on {}", self.address);
+    let listener = TcpListener::bind(&self.address).unwrap();
 
-            loop {
-                // the listener has an accept method, so we can use this to check for incoming connections.
-                // this could be a DoS condition as the socket will be closed when the value is dropped but what if the client never drops it?
-                // let incomingresult = listener.accept();
-                match listener.accept() {
-                    Ok((mut stream, addr)) => {
-                        println!("[*] Archibald: Oh hello {}", addr);
-                        // we need to read the request from the client
-                        // we use an array to store the request, filled with zeros initially and then the length. 
-                        // this is because we don't know how long the request will be. however this could also cause issues if the size is too large.
-                        let mut buffer = [0; 1024];
-                        stream.read(&mut buffer);
-                        // we need to convert the buffer to a string
-                        let request = String::from_utf8(buffer.to_vec()).unwrap();
-                        // we need to print the request to the console
-                        println!("[*] Archibald: My Lord, you asked me: {}", request);
-                        //using the requests function to parse the request
-                        //the buffer doesn't know how to handle the array so adding [..] includes the entire array
-                        //
-                        let response = match Request::try_from(&buffer[..]){
-                            Ok(request) => {
-                                match Request::try_from(&buffer[..]) {
-                                    Ok(request) => {
-                                        handler.handle_request(&request)
-                                    },
-                                    Err(e) => {
-                                        handler.handle_bad_request(&e)},
-                                }.send(&mut stream).expect("Stream write failed"); //this uses the send function in response.rs to send the response to the client
-                            }
-                            Err(_) => todo!(),
-                        };
+    loop {
+        match listener.accept() {
+            Ok((mut stream, addr)) => {
+                println!("[*] Archibald: Oh hello {}", addr);
+                let mut buffer = [0; 1024];
+                stream.read(&mut buffer);
+                let request = String::from_utf8(buffer.to_vec()).unwrap();
+                println!("[*] Archibald: My Lord, you asked me: {}", request);
+
+                let response = match Request::try_from(&buffer[..]) {
+                    Ok(request) => match handler.handle_request(&request) {
+                        Ok(response) => response.send(&mut stream).expect("Stream write failed"),
+                        Err(e) => handler.handle_bad_request(&e),
                     },
-                    Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
+                    Err(_) => todo!(),
+                };
+
+                if let Err(e) = response {
+                    println!("Failed to send response: {}", e);
                 }
             }
+            Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
         }
+    }
+}
     }
 }
 

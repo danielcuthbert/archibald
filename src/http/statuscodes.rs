@@ -4,6 +4,12 @@ use std::fmt::{Display, Formatter, Result as FmtResult}; //renaming result as i 
 
 // This is where we store all the codes we want to send
 // We have a friend name and then the integer that we can cast using StatusCode as a u16
+// It defines an enum StatusCode that represents HTTP status codes and provides implementations for the Into, Display, and Debug traits. The http_status_reason_phrase method returns the HTTP status reason phrase for a given status code. The Display trait implementation allows the StatusCode enum to be displayed as a string. 
+// The Debug trait implementation allows the StatusCode enum to be printed in a debug format.
+
+
+
+
 #[derive(Debug, Clone, Copy)] // we need this to copy our string and clone it
 #[repr(u16)] //treat all of these as u16s
 pub enum StatusCode {

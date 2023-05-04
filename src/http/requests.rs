@@ -4,17 +4,23 @@
 * Author: @danielcuthbert
 *
 * This code serves as the request function.
-*/
+* The code above is a Rust module that defines a Request struct and an implementation for it. The Request struct holds information about an HTTP request, including the request path, query string, and HTTP method. The Request struct also has methods to access these fields.
 
+* The Request struct is defined with a lifetime parameter 'buf, which is used to specify the lifetime of the string slice that holds the request path. This is necessary because the Request struct holds a reference to the request path, which is a slice of the original request buffer.
+
+* The Request struct also has an implementation of the TryFrom trait, which allows it to be created from a byte slice. The TryFrom implementation parses the byte slice into a string, then parses the string into the various fields of the Request struct.
+
+* The parse_request function is a helper function used by the TryFrom implementation to parse the request string. It takes a string slice and returns an Option containing a tuple of two string slices: the first slice is the next word in the request string, and the second slice is the remainder of the request string.
+*/
 use super::methods::{Allowedmethods, MethodError};
 use super::QueryString;
 use crate::http::errors::ParseError;
 use core::fmt::Debug;
 use std::convert::TryFrom;
 
-use std::error::Error;
-use std::fmt::{Display, Formatter};
-use std::str::{self, Utf8Error};
+// use std::error::Error;
+// use std::fmt::{Display, Formatter};
+// use std::str::{self, Utf8Error};
 
 #[derive(Debug)]
 pub struct Request<'buf> {
