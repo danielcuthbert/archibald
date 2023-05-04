@@ -5,7 +5,7 @@
 *
 */
 
-use std::str::FromStr; // This trait parse a value from a string // This trait is used to display the error
+use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Allowedmethods {
@@ -20,13 +20,9 @@ pub enum Allowedmethods {
     CONNECT,
 }
 
-// This function receives a string that contains the method from the request and we need to convert it
-
 impl FromStr for Allowedmethods {
     type Err = MethodError;
 
-    // This function receives a string that contains a method from the request
-    // We need to convert this
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "GET" => Ok(Allowedmethods::GET),
@@ -38,12 +34,18 @@ impl FromStr for Allowedmethods {
             "PATCH" => Ok(Allowedmethods::PATCH),
             "TRACE" => Ok(Allowedmethods::TRACE),
             "CONNECT" => Ok(Allowedmethods::CONNECT),
-            //_ => Err(format!("So sorry old chap, that method is invalid: {}", s)),
             _ => Err(MethodError),
         }
     }
 }
 
-// We need a custom error type for the request parser
-
+#[derive(Debug)]
 pub struct MethodError;
+
+impl std::fmt::Display for MethodError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Invalid HTTP method")
+    }
+}
+
+impl std::error::Error for MethodError {}
