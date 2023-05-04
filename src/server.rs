@@ -56,12 +56,12 @@ pub mod archibaldserver {
         // We now need a run method to start the server.
         // This will be called by the main function.
         // self just points to the instance of the struct
-pub fn run(self, mut handler: impl ServerHandler) {
-    println!("[*] Archibald: Starting to serve you on {}", self.address);
-    let listener = TcpListener::bind(&self.address).unwrap();
+        pub fn run(self, mut handler: impl ServerHandler) {
+            println!("[*] Archibald: Starting to serve you on {}", self.address);
+            let listener = TcpListener::bind(&self.address).unwrap();
 
-    loop {
-        match listener.accept() {
+            loop {
+                match listener.accept() {
             Ok((mut stream, addr)) => {
                 println!("[*] Archibald: Oh hello {}", addr);
                 let mut buffer = [0; 1024];
@@ -83,8 +83,8 @@ pub fn run(self, mut handler: impl ServerHandler) {
             }
             Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
         }
-    }
-}
+            }
+        }
     }
 }
 

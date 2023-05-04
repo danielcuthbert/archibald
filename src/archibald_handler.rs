@@ -4,20 +4,18 @@
 * Author: @danielcuthbert
 *
 **/
-
 // The ArchibaldHandler struct holds the path to the directory containing the static files. The new method is used to create a new instance of the ArchibaldHandler struct with the given static path.
 
-// The read_file method is used to read a file from the static directory. It takes a file path as an argument and returns the contents of the file as a String. 
-// The method first constructs the absolute path to the file by concatenating the static path and the file path. It then checks if the absolute path is valid and starts with the static path. 
+// The read_file method is used to read a file from the static directory. It takes a file path as an argument and returns the contents of the file as a String.
+// The method first constructs the absolute path to the file by concatenating the static path and the file path. It then checks if the absolute path is valid and starts with the static path.
 // If the path is valid, it reads the contents of the file and returns it as a String. If the path is not valid, it returns None.
 
-// The handle_request method is used to handle incoming HTTP requests. It takes a Request object as an argument and returns a Response object. 
-// The method first logs the HTTP method and path of the request. If the request method is GET, it checks the request path and returns the appropriate response. 
-// If the request path is /, it returns the contents of the index.html file. If the request path is not /, it reads the file with the given path and returns its contents. 
+// The handle_request method is used to handle incoming HTTP requests. It takes a Request object as an argument and returns a Response object.
+// The method first logs the HTTP method and path of the request. If the request method is GET, it checks the request path and returns the appropriate response.
+// If the request path is /, it returns the contents of the index.html file. If the request path is not /, it reads the file with the given path and returns its contents.
 // If the request method is not GET, it returns a 404 Not Found response.
 
 // The handle_bad_request method is not implemented and is currently a stub. It takes a ParseError object as an argument and returns a Response object.
-
 
 // use crate::http::statuscodes;
 use crate::http::methods::Allowedmethods;

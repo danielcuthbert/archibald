@@ -60,7 +60,8 @@ impl<'buf> TryFrom<&'buf [u8]> for Request<'buf> {
     type Error = ParseError;
 
     fn try_from(buf: &'buf [u8]) -> Result<Request<'buf>, Self::Error> {
-        let request = str::from_utf8(buf)?;
+        let request = std::str::from_utf8(buf)?;
+
         let (_method, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
         let (mut path, request) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
         let (_protocol, _) = parse_request(request).ok_or(ParseError::InvalidRequest)?;
