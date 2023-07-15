@@ -19,13 +19,13 @@
 
 // use crate::http::statuscodes;
 use crate::http::methods::Allowedmethods;
-use crate::http::requests::Request;
+use crate::http::arch_requests::Request;
 use crate::http::statuscodes::StatusCode;
 use log::info;
-use response::Response;
+use arch_response::Response;
 
 // We make use of a Archibald Handler
-use super::http::{methods, requests, response, statuscodes};
+use super::http::{methods, arch_requests, arch_response, statuscodes};
 // use super::http::response::Response;
 // use super::http::Methods;
 // use super::http::StatusCode;
@@ -95,6 +95,10 @@ impl ServerHandler for ArchibaldHandler {
     }
 
     fn handle_bad_request(&mut self, e: &crate::http::errors::ParseError) -> Response {
+        todo!()
+    }
+
+    fn handle_request_internal(&mut self, request: &Request) -> Result<Response, crate::http::ParseError> {
         todo!()
     }
 }
