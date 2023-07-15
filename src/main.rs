@@ -1,6 +1,6 @@
 use archibald_handler::ArchibaldHandler;
 
-use http::method::Method;
+use http::methods::Allowedmethods;
 use log::LevelFilter;
 
 use server::archibaldserver::Server;
@@ -48,7 +48,7 @@ fn main() {
     println!("Listening port is: {}", data.config.port);
 
     let archibald = Server::new(format!("{}:{}", data.config.ip, data.config.port));
-    let _get = Method::GET;
-    let _post = Method::POST;
+    let _get = Allowedmethods::GET;
+    let _post = Allowedmethods::POST;
     archibald.run(ArchibaldHandler::new(data.config.default_path));
 }

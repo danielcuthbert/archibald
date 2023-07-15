@@ -12,8 +12,8 @@
 pub mod archibaldserver {
     /// This is the main struct that will be used to run the server.
     use crate::http::errors::ParseError;
-    use crate::http::response;
-    use crate::http::{requests::Request, Response, StatusCode};
+    
+    use crate::http::{arch_requests::Requests, Response};
 
     use std::convert::TryFrom;
 
@@ -24,68 +24,51 @@ pub mod archibaldserver {
     use std::net::TcpListener;
 
     pub trait ServerHandler {
-        /// This is the main handler for the server. It will take a request and return a response.
-        fn handle_request(&mut self, request: &Request) -> Response;
-
-        /// This is the error handler for the server. It will take a request and return a response.
-
+        fn handle_request(&mut self, request: &Requests) -> Response;
+    
         fn handle_bad_request(&mut self, e: &ParseError) -> Response;
-        //    println!("{}", e);
-        //Response::new(StatusCode::BadRequest, None)
+    
+        fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, ParseError>;
     }
-
-    //use crate::http::errors;
-
-    // by default all mods are private so we need to make this public
-    #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+    
     pub struct Server {
-        /// This is the address we're listening on and it is stored in a string.
         address: String,
     }
-
+    
     impl Server {
-        /// We need an implementation block to hold the implementation of the Server struct
-        /// This holds all the functionality we want to use in the server.
-
         pub fn new<T: Into<String>>(address: T) -> Self {
-            // We need to return a new Server struct with the address we're listening on
             Self {
                 address: address.into(),
             }
         }
-        // We now need a run method to start the server.
-        // This will be called by the main function.
-        // self just points to the instance of the struct
+    
         pub fn run(self, mut handler: impl ServerHandler) {
             println!("[*] Archibald: Starting to serve you on {}", self.address);
             let listener = TcpListener::bind(&self.address).unwrap();
-
+    
             loop {
                 match listener.accept() {
-            Ok((mut stream, addr)) => {
-                println!("[*] Archibald: Oh hello {}", addr);
-                let mut buffer = [0; 1024];
-                stream.read(&mut buffer);
-                let request = String::from_utf8(buffer.to_vec()).unwrap();
-                println!("[*] Archibald: My Lord, you asked me: {}", request);
-
-                let response = match Request::try_from(&buffer[..]) {
-                    Ok(request) => match handler.handle_request(&request) {
-                        Ok(response) => response.send(&mut stream).expect("Stream write failed"),
-                        Err(e) => handler.handle_bad_request(&e),
+                    Ok((mut stream, addr)) => {
+                        println!("[*] Archibald: Oh hello {}", addr);
+                        let mut buffer = [0; 1024];
+                        let bytes_read = stream.read(&mut buffer).unwrap();
+                        println!("[*] Archibald: I read {} bytes", bytes_read);
+    
+                        let human_request = String::from_utf8(buffer.to_vec()).unwrap();
+    
+                        let human_request = Requests::try_from(human_request.as_bytes()).unwrap();
+                        println!("[*] Archibald: My Lord, you asked me: {}", human_request);
+    
+                        let response = handler.handle_request_internal(&human_request);
+    
+                        if let Err(e) = response.send(&mut stream) {
+                            println!("Failed to send response: {}", e);
+                        }
                     },
                     Err(_) => todo!(),
-                };
-
-                if let Err(e) = response {
-                    println!("Failed to send response: {}", e);
                 }
-            }
-            Err(e) => println!("[!] Archibald: Terribly sorry old boy, I'm unable to accept the incoming connection: {}", e),
-        }
             }
         }
     }
-}
-
-// End of the server struct.
+    
+    
