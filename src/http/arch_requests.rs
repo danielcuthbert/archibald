@@ -6,7 +6,7 @@ use std::convert::TryFrom;
 use std::path;
 
 mod validation {
-    use crate::http::{methods::Allowedmethods, validation};
+    use crate::http::{methods::Allowedmethods, validation, ParseError};
 
     pub fn sanitize_input(input: &str) -> String {
         let mut sanitized_input = String::new();
@@ -27,9 +27,15 @@ mod validation {
 
 #[derive(Debug)]
 pub struct Requests<'buf> {
-    reqpath: &'buf str,
-    query_string: Option<QueryString>,
+    path: &'buf str,
+    reqpath: &str,
     method: Allowedmethods,
+}
+
+impl std::fmt::Display for Requests<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.path)
+    }
 }
 
 // We need to send back a response to the client
@@ -86,6 +92,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
             reqpath: request,
             query_string,
             method,
+            path: todo!(),
             
         };
 

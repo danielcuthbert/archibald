@@ -19,8 +19,9 @@
 
 // use crate::http::statuscodes;
 use crate::http::methods::Allowedmethods;
-use crate::http::arch_requests::Request;
+use crate::http::arch_requests::Requests;
 use crate::http::statuscodes::StatusCode;
+use crate::server::ServerHandler;
 use log::info;
 use arch_response::Response;
 
@@ -30,7 +31,7 @@ use super::http::{methods, arch_requests, arch_response, statuscodes};
 // use super::http::Methods;
 // use super::http::StatusCode;
 use super::http::statuscodes::StatusCode::{JollyGood, NotFound};
-use super::server::archibaldserver::ServerHandler;
+
 use std::fs;
 
 /// this is the main handler module
@@ -75,7 +76,7 @@ impl ArchibaldHandler {
 
 impl ServerHandler for ArchibaldHandler {
     /// This handles the request
-    fn handle_request(&mut self, request: &Request) -> Response {
+    fn handle_request(&mut self, request: &Requests) -> Response {
         info!("METHOD {:?} PATH '{}'", request.method(), request.path());
         match request.method() {
             // If a GET request is made, we need to check the path and return the appropriate response
@@ -98,7 +99,7 @@ impl ServerHandler for ArchibaldHandler {
         todo!()
     }
 
-    fn handle_request_internal(&mut self, request: &Request) -> Result<Response, crate::http::ParseError> {
+    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, crate::http::ParseError> {
         todo!()
     }
 }

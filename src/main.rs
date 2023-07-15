@@ -3,7 +3,7 @@ use archibald_handler::ArchibaldHandler;
 use http::methods::Allowedmethods;
 use log::LevelFilter;
 
-use server::archibaldserver::Server;
+use server::Server;
 
 mod archibald_handler;
 mod http;
