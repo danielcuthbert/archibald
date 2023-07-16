@@ -1,10 +1,4 @@
-/*
-* Archibald: a loyal web server
-* Main methods module
-* Author: @danielcuthbert
-*
-*/
-
+use crate::http::methods::Allowedmethods as OtherAllowedmethods;
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -18,6 +12,26 @@ pub enum Allowedmethods {
     PATCH,
     TRACE,
     CONNECT,
+}
+
+impl Allowedmethods {
+    pub fn is_valid(&self) -> bool {
+        match self {
+            Allowedmethods::GET => true,
+            Allowedmethods::POST => true,
+            Allowedmethods::PUT => true,
+            Allowedmethods::DELETE => true,
+            Allowedmethods::HEAD => true,
+            Allowedmethods::OPTIONS => true,
+            Allowedmethods::PATCH => true,
+            Allowedmethods::TRACE => true,
+            Allowedmethods::CONNECT => true,
+        }
+    }
+
+    pub fn as_str(&self) -> &str {
+        "GET"
+    }
 }
 
 impl FromStr for Allowedmethods {

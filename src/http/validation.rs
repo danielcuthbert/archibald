@@ -1,11 +1,12 @@
-use crate::http::{arch_requests::Requests, methods::Allowedmethods, ValidationParseError};
+use crate::http::{arch_requests::Requests, methods::Allowedmethods};
 use std::error::Error;
 use std::fmt::{Display, Formatter};
-use std::str::{self, Regex};
+use std::str;
+use regex::Regex;
 
 mod validation {
     
-    use crate::http::{arch_requests::Requests, methods::Allowedmethods, ValidationParseError};
+    use crate::http::{arch_requests::Requests, methods::Allowedmethods};
 
     enum ValidationParseError {
         InvalidMethod,
@@ -40,16 +41,25 @@ mod validation {
         Ok(())
     }
 
-    pub fn sanitize_input(input: &str) -> String {
-        let mut sanitized_input = String::new();
     
-        for character in input.chars() {
-            if !Regex::new(r"[^\w\s]").unwrap().is_match(&character.to_string()) {
-                sanitized_input.push(character);
-            }
-        }
     
-        return sanitized_input;
-    }
+    
+    
 
+}
+
+pub fn sanitize_input(input: &str) -> String {
+    use regex::Regex;
+    let mut sanitized_input = String::new();
+
+    for character in input.chars() {
+        // I want to use Regex here to check if the character is a valid character
+        if !Regex::new(r"[^\w\s]").unwrap().is_match(&character.to_string()) {
+            sanitized_input.push(character);
+        }
+        
+        
+    }
+    // return the sanitized input to the caller
+    return sanitized_input;
 }

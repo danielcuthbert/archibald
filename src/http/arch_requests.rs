@@ -5,24 +5,30 @@ use core::fmt::Debug;
 use std::convert::TryFrom;
 use std::path;
 
+
 mod validation {
+    use std::error::Error;
+
     use crate::http::{methods::Allowedmethods, validation, ParseError};
-
-    pub fn sanitize_input(input: &str) -> String {
+    use regex::Regex;
+    
+    pub fn sanitize_input(input: &str) -> Result<(), Box<dyn Error>> {
         let mut sanitized_input = String::new();
-
         for character in input.chars() {
             if !Regex::new(r"[^\w\s]").unwrap().is_match(&character.to_string()) {
                 sanitized_input.push(character);
             }
         }
-
-        return sanitized_input;
+    
+        Ok(sanitized_input)
     }
 
-    pub fn validate_input(path: &str) -> Result<(), ParseError> {
-        validation::sanitize_input(path)
+    pub fn validate_input(path: &str) -> Result<(), Box<dyn Error>> {
+        let sanitized_path = sanitize_input(path)?;
+    
+        validation::validate_input(&sanitized_path)
     }
+    
 }
 
 #[derive(Debug)]
