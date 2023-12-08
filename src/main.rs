@@ -2,7 +2,6 @@ use archibald_handler::ArchibaldHandler;
 
 use http::methods::Allowedmethods;
 
-
 use server::Server;
 
 mod archibald_handler;
@@ -11,12 +10,11 @@ mod server;
 mod settings;
 use settings::Settings;
 
-use std::{fs, process::exit};
-use std::fs::File;
-use std::fs::OpenOptions;
 use log::LevelFilter;
 use simplelog::*;
-
+use std::fs::File;
+use std::fs::OpenOptions;
+use std::{fs, process::exit};
 
 // #[derive(Deserialize)]
 // struct ArchibaldConfig {
@@ -32,8 +30,6 @@ use simplelog::*;
 // }
 
 fn main() {
-    
-
     // Load settings
     let settings = Settings::new().expect("Config loading failed");
 
@@ -49,20 +45,26 @@ fn main() {
         .expect("Unable to open log file");
 
     // Initialize combined logger
-    CombinedLogger::init(
-        vec![
-            TermLogger::new(LevelFilter::Info, Config::default(), TerminalMode::Mixed, ColorChoice::Auto),
-            WriteLogger::new(LevelFilter::Info, Config::default(), log_file),
-        ]
-    ).unwrap();
+    CombinedLogger::init(vec![
+        TermLogger::new(
+            LevelFilter::Info,
+            Config::default(),
+            TerminalMode::Mixed,
+            ColorChoice::Auto,
+        ),
+        WriteLogger::new(LevelFilter::Info, Config::default(), log_file),
+    ])
+    .unwrap();
 
     println!("Loading Archibald on: {}", settings.server.address);
     println!("Listening port is: {}", settings.server.port);
 
     // Initialize your server using settings
-    let archibald = Server::new(format!("{}:{}", settings.server.address, settings.server.port));
-    
+    let archibald = Server::new(format!(
+        "{}:{}",
+        settings.server.address, settings.server.port
+    ));
+
     // Initialize handler (ArchibaldHandler) using settings
     archibald.run(ArchibaldHandler::new(settings.web.static_root));
 }
-

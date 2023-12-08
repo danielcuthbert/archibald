@@ -29,7 +29,7 @@ impl Server {
             Err(e) => {
                 println!("Failed to bind to address {}: {}", self.address, e);
                 return;
-            },
+            }
         };
 
         loop {
@@ -42,7 +42,7 @@ impl Server {
                         Err(e) => {
                             println!("Error reading from stream: {}", e);
                             continue;
-                        },
+                        }
                     };
 
                     let human_request = match String::from_utf8(buffer[..bytes_read].to_vec()) {
@@ -50,7 +50,7 @@ impl Server {
                         Err(e) => {
                             println!("Invalid UTF-8 sequence: {}", e);
                             continue;
-                        },
+                        }
                     };
 
                     let human_request = match Requests::try_from(human_request.as_bytes()) {
@@ -59,7 +59,7 @@ impl Server {
                             // You might want to send a bad request response here
                             println!("Failed to parse request: {}", e);
                             continue;
-                        },
+                        }
                     };
 
                     match handler.handle_request_internal(&human_request) {
@@ -67,20 +67,20 @@ impl Server {
                             if let Err(e) = response.send(&mut stream) {
                                 println!("Failed to send response: {}", e);
                             }
-                        },
+                        }
                         Err(e) => {
                             // Handle the bad request
                             let bad_response = handler.handle_bad_request(&e);
                             if let Err(err) = bad_response.send(&mut stream) {
                                 println!("Failed to send error response: {}", err);
                             }
-                        },
+                        }
                     }
-                },
+                }
                 Err(e) => {
                     println!("Failed to accept connection: {}", e);
                     continue;
-                },
+                }
             }
         }
     }

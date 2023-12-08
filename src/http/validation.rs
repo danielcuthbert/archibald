@@ -1,8 +1,8 @@
 use crate::http::arch_requests::Requests;
 use crate::http::methods::Allowedmethods;
 use regex::Regex;
-use std::fmt::{Display, Formatter};
 use std::error::Error;
+use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub enum ValidationParseError {
@@ -17,7 +17,9 @@ impl Display for ValidationParseError {
         match *self {
             ValidationParseError::InvalidMethod => write!(f, "Invalid method"),
             ValidationParseError::MaliciousPath => write!(f, "Malicious path detected"),
-            ValidationParseError::MaliciousQueryString => write!(f, "Malicious query string detected"),
+            ValidationParseError::MaliciousQueryString => {
+                write!(f, "Malicious query string detected")
+            }
             ValidationParseError::InvalidRegex => write!(f, "Invalid regex pattern"),
         }
     }
@@ -26,11 +28,9 @@ impl Display for ValidationParseError {
 impl Error for ValidationParseError {}
 
 pub fn sanitize_input(input: &str) -> String {
-    let re = Regex::new(r"[^\w\s./]").expect("Invalid regex pattern");  // Allow dots and slashes
+    let re = Regex::new(r"[^\w\s./]").expect("Invalid regex pattern"); // Allow dots and slashes
     re.replace_all(input, "").to_string()
 }
-
-
 
 pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
     let method = request.method();

@@ -1,3 +1,4 @@
+use crate::http::arch_requests::Requests;
 /**
 * Archibald: a loyal web server
 * This holds the implementation of the handler
@@ -19,12 +20,11 @@
 
 // use crate::http::statuscodes;
 use crate::http::methods::Allowedmethods;
-use crate::http::arch_requests::Requests;
 use crate::http::statuscodes::StatusCode;
 use crate::http::validation;
 use crate::server::ServerHandler;
-use log::{info, warn};
 use arch_response::Response;
+use log::{info, warn};
 // use std::path::PathBuf;
 
 // We make use of a Archibald Handler
@@ -64,7 +64,11 @@ impl ArchibaldHandler {
             return None;
         }
 
-        let path = format!("{}/{}", self.static_path, sanitized_path.strip_prefix('/').unwrap_or(&sanitized_path));
+        let path = format!(
+            "{}/{}",
+            self.static_path,
+            sanitized_path.strip_prefix('/').unwrap_or(&sanitized_path)
+        );
         info!("Attempting to read file at path: {}", path);
 
         match fs::canonicalize(&path) {
@@ -80,38 +84,42 @@ impl ArchibaldHandler {
             Err(e) => {
                 warn!("Error reading file: {}", e);
                 None
-            },
+            }
         }
     }
 }
 
 impl ServerHandler for ArchibaldHandler {
     fn handle_request(&mut self, request: &Requests) -> Response {
-        info!("Received request: METHOD {:?}, PATH '{}'", request.method(), request.path());
+        info!(
+            "Received request: METHOD {:?}, PATH '{}'",
+            request.method(),
+            request.path()
+        );
 
         match request.method() {
             Allowedmethods::GET => {
                 let path = if request.path() == "/" {
-                    "index.html"  // Serve index.html if root is requested
+                    "index.html" // Serve index.html if root is requested
                 } else {
-                    &request.path()[1..]  // Serve file directly
+                    &request.path()[1..] // Serve file directly
                 };
 
                 match self.read_file(path) {
                     Some(content) => {
                         info!("Serving file: {}", path);
                         Response::new(JollyGood, Some(content))
-                    },
+                    }
                     None => {
                         warn!("File not found or access denied: {}", path);
                         Response::new(NotFound, Some("Access Denied".to_string()))
-                    },
+                    }
                 }
-            },
+            }
             _ => {
                 warn!("Method not allowed: {:?}", request.method());
                 Response::new(NotFound, Some("Method Not Allowed".to_string()))
-            },
+            }
         }
     }
 
@@ -120,7 +128,10 @@ impl ServerHandler for ArchibaldHandler {
         Response::new(NotFound, Some("Bad Request".to_string()))
     }
 
-    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, crate::http::errors::ParseError> {
+    fn handle_request_internal(
+        &mut self,
+        request: &Requests,
+    ) -> Result<Response, crate::http::errors::ParseError> {
         Ok(self.handle_request(request))
     }
 }

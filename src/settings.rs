@@ -1,8 +1,6 @@
-use std::fmt;
+use ::config::{builder::DefaultState, Config, ConfigBuilder, ConfigError, File};
 use serde::Deserialize;
-use ::config::{Config, ConfigError, File, ConfigBuilder, builder::DefaultState};
-
-
+use std::fmt;
 
 const CONFIG_FILE_PATH: &str = "./orders/archibald.toml";
 
@@ -56,4 +54,3 @@ impl Settings {
         builder.try_deserialize::<Settings>()
     }
 }
-

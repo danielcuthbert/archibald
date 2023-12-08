@@ -1,25 +1,22 @@
 use super::methods::Allowedmethods;
 use crate::http::errors::ParseError;
 
-
-
-
 mod validation {
     use crate::http::errors::ParseError;
     use std::path::Path;
     // use std::error::Error;
 
     pub fn sanitize_input(input: &str) -> String {
-        input.chars()
-             .filter(|&c| c.is_alphanumeric() || c.is_whitespace())
-             .collect()
+        input
+            .chars()
+            .filter(|&c| c.is_alphanumeric() || c.is_whitespace())
+            .collect()
     }
 
     pub fn validate_input(path: &str) -> Result<(), ParseError> {
         if !Path::new(path).exists() {
             // Convert the std::io::Error into your ParseError type
             return Err(ParseError::NotFound(404));
-
         }
 
         Ok(())
@@ -41,7 +38,11 @@ impl std::fmt::Display for Requests<'_> {
 
 impl<'buf> Requests<'buf> {
     pub fn new(path: &'buf str, method: Allowedmethods, query_string: Option<&'buf str>) -> Self {
-        Requests { path, method, query_string }
+        Requests {
+            path,
+            method,
+            query_string,
+        }
     }
 
     pub fn path(&self) -> &str {
@@ -90,8 +91,6 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
     }
 }
 
-
 fn parse_request(request: &str) -> Option<(&str, &str)> {
     request.split_once(' ').or_else(|| request.split_once('\r'))
 }
-
