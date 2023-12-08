@@ -1,49 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Archibald Default Page</title>
-    <link rel="stylesheet" href="static_content/style.css" />
+
+    <!-- Bootstrap 5 CSS -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css"
-      integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.0/css/bootstrap.min.css"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+z0I5t9z5lFfTk5mU5aoRraGz8m5gog2YFVJF4e"
       crossorigin="anonymous"
     />
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.7.2/font/bootstrap-icons.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="static_content/style.css" />
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            text-align: center; /* Center text */
+        }
+        h1 {
+            color: #007bff; /* Bootstrap primary color */
+        }
+        .warning-text {
+            color: #dc3545; /* Bootstrap danger color */
+            font-weight: bold;
+        }
+        .card {
+            margin: 20px;
+            border: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .list-group-item {
+            border: none;
+        }
+        .bi-check-circle-fill {
+            color: #28a745; /* Green color for icons */
+            margin-right: 10px;
+        }
+        /* Additional custom styles */
+    </style>
+
+    <!-- jQuery and Bootstrap JS -->
     <script
-      src="https://code.jquery.com/jquery-1.12.4.min.js"
-      integrity="sha384-nvAa0+6Qg9clwYCGGPpDQLVpLNn0fRaROjHqs13t4Ggj3Ez50XnGQqc/r8MhnRDZ"
+      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
       crossorigin="anonymous"
     ></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js"
-      integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd"
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-p34f1UUtsS3wqzKjUlUqE5ypwU4IoojPLD1N/uOxRwzi1yGsvCPL7EAcGKzJpn36"
       crossorigin="anonymous"
     ></script>
-  </head>
-  <body class="text-center">
+</head>
+<body>
+    <!-- Logo Image -->
+    <div class="text-center my-4">
+      <img src="img/logo.png" alt="Archibald Butler Logo" style="max-width: 200px;">
+  </div>
     <h1>How May I Serve You?</h1>
 
-    <b>
-      <p style="color: crimson">
-        This web server is not production ready and ideally you should not be
-        using it
-      </p>
-    </b>
-    <br />
+    <!-- Card for Warning Text -->
+    <div class="card my-4">
+        <div class="card-body">
+            <p class="warning-text">
+                This web server is not production ready and ideally you should not be using it.
+            </p>
+        </div>
+    </div>
 
-    <b>It is only here for demonstration purposes</b><br /><br />
-    <b>The following still needs to be done:</b>
-    <ol>
-      <li>
-        Implement proper environment variable reading for static_content
-        directory
-      </li>
-      <li>Implement a correct logging function</li>
-    </ol>
-  </body>
+    <!-- Card for Other Information -->
+    <div class="card my-4">
+        <div class="card-body">
+            <p>It is only here for demonstration purposes</p>
+            <p>The following still needs to be done:</p>
+
+            <!-- List with Icons -->
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item">
+                    <i class="bi bi-check-circle-fill"></i> Implement proper environment variable reading for static_content directory
+                </li>
+                <li class="list-group-item">
+                    <i class="bi bi-check-circle-fill"></i> Implement TLS and PQC
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- User Input Form -->
+    <form id="userForm">
+        <div class="form-group">
+            <label for="userName">Enter your name:</label>
+            <input type="text" id="userName" name="userName" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <p id="greetingText"></p>
+
+    <script>
+        document.getElementById("userForm").onsubmit = function(event) {
+            event.preventDefault();
+            var userName = document.getElementById("userName").value;
+            document.getElementById("greetingText").innerText = "Hello, " + userName + "!";
+        };
+    </script>
+</body>
 </html>

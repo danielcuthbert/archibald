@@ -23,12 +23,12 @@ use crate::http::arch_requests::Requests;
 use crate::http::statuscodes::StatusCode;
 use crate::http::validation;
 use crate::server::ServerHandler;
-use log::{info, error, warn};
+use log::{info, warn};
 use arch_response::Response;
-use std::path::PathBuf;
+// use std::path::PathBuf;
 
 // We make use of a Archibald Handler
-use super::http::{arch_response};
+use super::http::arch_response;
 // use super::http::response::Response;
 // use super::http::Methods;
 // use super::http::StatusCode;

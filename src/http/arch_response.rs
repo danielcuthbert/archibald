@@ -11,38 +11,31 @@ use super::StatusCode;
 use std::io::{Result as IoResult, Write};
  // same as FMT so we call it something else here
 
+
 #[derive(Debug)]
 pub struct Response {
-    /// the contents of these 3 fields get copied to new strings on the heap when we create a new response
-    //pub statuscode: u16,
-    //statuscode_raw: StatusCode,
-    statusmessage: String,
+    status_code: StatusCode,
     body: Option<String>,
-    status_code: StatusCode, //there might be no body so we can use Option<>
 }
 
 impl Response {
-    /// This allows us to create a new response, we can use this to create a response with a body or without
     pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
         Response {
-            body,
             status_code,
-            statusmessage: status_code.to_string(),
+            body,
         }
     }
 
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
-        // This allows us to send the response to the client
-        let body = match &self.body {
-            Some(b) => b,
-            None => "",
-        };
+        let body = self.body.as_deref().unwrap_or("");
+        let content_length = body.len();
 
         write!(
             stream,
-            "HTTP/1.1 {} {}\r\n\r\n{}",
+            "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n{}",
             self.status_code,
             self.status_code.http_status_reason_phrase(),
+            content_length,
             body
         )
     }

@@ -10,10 +10,10 @@ mod http;
 mod server;
 mod settings;
 use settings::Settings;
-use serde::Deserialize;
+
 use std::{fs, process::exit};
 use std::fs::File;
-
+use std::fs::OpenOptions;
 use log::LevelFilter;
 use simplelog::*;
 
@@ -39,6 +39,14 @@ fn main() {
 
     // Create a log file
     let log_file = File::create("archibald_server.log").unwrap();
+
+    // Open log file in append mode
+    let log_file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open("archibald_server.log")
+        .expect("Unable to open log file");
 
     // Initialize combined logger
     CombinedLogger::init(

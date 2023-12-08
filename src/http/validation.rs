@@ -26,9 +26,10 @@ impl Display for ValidationParseError {
 impl Error for ValidationParseError {}
 
 pub fn sanitize_input(input: &str) -> String {
-    let re = Regex::new(r"[^\w\s.]").expect("Invalid regex pattern");  // Allow dots
+    let re = Regex::new(r"[^\w\s./]").expect("Invalid regex pattern");  // Allow dots and slashes
     re.replace_all(input, "").to_string()
 }
+
 
 
 pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {

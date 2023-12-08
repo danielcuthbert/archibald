@@ -32,7 +32,19 @@ The main.rs file contains the main function that starts the web server. It does 
 
 ### server.rs
 
-The server.rs file contains the definition of the Server struct and the ServerHandler trait. Here's a brief overview of their functionality:
+The server.rs file contains the definition of the Server struct and the ServerHandler trait. 
+
+It sets up the basic structure for a TCP server that listens for incoming connections, reads requests, and sends responses. The handle_request_internal method of the ServerHandler trait returns a Result<Response, ParseError>, and this response is sent back to the client using the response.send(&mut stream) method.
+
+Where and how the Response struct is being used in the server logic:
+
+    Handling Requests: When a request is received and parsed successfully, handle_request_internal is called. This method presumably constructs a Response object based on the request and application logic.
+
+    Sending Responses: The constructed Response is then sent back to the client using the send method of the Response struct. This is where the HTTP response, including the status line and headers, is formatted and written to the client's stream.
+
+    Handling Bad Requests: If the request parsing fails, The error is printed out.
+
+Here's a brief overview of their functionality:
 
 The ServerHandler trait defines three methods that a server handler should implement: handle_request, handle_bad_request, and handle_request_internal.
 
