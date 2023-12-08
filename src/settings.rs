@@ -1,9 +1,10 @@
 use std::fmt;
 use serde::Deserialize;
-use config::{Config, ConfigError, File, ConfigBuilder, builder::DefaultState};
+use ::config::{Config, ConfigError, File, ConfigBuilder, builder::DefaultState};
 
 
-const CONFIG_FILE_PATH: &str = "./config/archibald.toml";
+
+const CONFIG_FILE_PATH: &str = "./orders/archibald.toml";
 
 #[derive(Debug, Deserialize)]
 pub struct Log {

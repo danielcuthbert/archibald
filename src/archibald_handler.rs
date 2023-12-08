@@ -21,8 +21,9 @@
 use crate::http::methods::Allowedmethods;
 use crate::http::arch_requests::Requests;
 use crate::http::statuscodes::StatusCode;
+use crate::http::validation;
 use crate::server::ServerHandler;
-use log::info;
+use log::{info, error, warn};
 use arch_response::Response;
 use std::path::PathBuf;
 
@@ -55,30 +56,38 @@ impl ArchibaldHandler {
     }
 
     fn read_file(&self, file_path: &str) -> Option<String> {
-        if file_path.contains("..") {
-            println!("Directory traversal attack attempt detected: {}", file_path);
+        let sanitized_path = validation::sanitize_input(file_path);
+        info!("Sanitized path: {}", sanitized_path);
+
+        if sanitized_path.contains("..") {
+            warn!("Directory traversal attempt detected: {}", sanitized_path);
             return None;
         }
 
-        let path = format!("{}/{}", self.static_path, file_path);
+        let path = format!("{}/{}", self.static_path, sanitized_path.strip_prefix('/').unwrap_or(&sanitized_path));
+        info!("Attempting to read file at path: {}", path);
 
-        match fs::canonicalize(PathBuf::from(path)) {
+        match fs::canonicalize(&path) {
             Ok(canonical_path) => {
+                info!("Canonical path: {}", canonical_path.display());
                 if canonical_path.starts_with(&self.static_path) {
                     fs::read_to_string(canonical_path).ok()
                 } else {
-                    println!("Potential directory traversal attack: {}", file_path);
+                    warn!("Potential security risk detected: {}", file_path);
                     None
                 }
             }
-            Err(_) => None,
+            Err(e) => {
+                warn!("Error reading file: {}", e);
+                None
+            },
         }
     }
 }
 
 impl ServerHandler for ArchibaldHandler {
     fn handle_request(&mut self, request: &Requests) -> Response {
-        info!("METHOD {:?} PATH '{}'", request.method(), request.path());
+        info!("Received request: METHOD {:?}, PATH '{}'", request.method(), request.path());
 
         match request.method() {
             Allowedmethods::GET => {
@@ -89,15 +98,25 @@ impl ServerHandler for ArchibaldHandler {
                 };
 
                 match self.read_file(path) {
-                    Some(content) => Response::new(JollyGood, Some(content)),
-                    None => Response::new(NotFound, Some("Access Denied".to_string())),
+                    Some(content) => {
+                        info!("Serving file: {}", path);
+                        Response::new(JollyGood, Some(content))
+                    },
+                    None => {
+                        warn!("File not found or access denied: {}", path);
+                        Response::new(NotFound, Some("Access Denied".to_string()))
+                    },
                 }
             },
-            _ => Response::new(NotFound, Some("Method Not Allowed".to_string())),
+            _ => {
+                warn!("Method not allowed: {:?}", request.method());
+                Response::new(NotFound, Some("Method Not Allowed".to_string()))
+            },
         }
     }
 
     fn handle_bad_request(&mut self, _e: &crate::http::errors::ParseError) -> Response {
+        warn!("Bad request encountered");
         Response::new(NotFound, Some("Bad Request".to_string()))
     }
 

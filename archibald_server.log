@@ -1,1 +1,15 @@
-18:37:23 [INFO] STATIC PATH: /Users/daniel/Code/Archibald/static_content
+11:34:53 [INFO] Received request: METHOD GET, PATH '/index.html'
+11:34:53 [INFO] Sanitized path: index.html
+11:34:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/index.html
+11:34:53 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/index.html
+11:34:53 [INFO] Serving file: index.html
+11:34:53 [INFO] Received request: METHOD GET, PATH '/static_content/style.css'
+11:34:53 [INFO] Sanitized path: static_contentstyle.css
+11:34:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/static_contentstyle.css
+11:34:53 [WARN] Error reading file: No such file or directory (os error 2)
+11:34:53 [WARN] File not found or access denied: static_content/style.css
+11:35:16 [INFO] Received request: METHOD GET, PATH '/etc/passwd'
+11:35:16 [INFO] Sanitized path: etcpasswd
+11:35:16 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/etcpasswd
+11:35:16 [WARN] Error reading file: No such file or directory (os error 2)
+11:35:16 [WARN] File not found or access denied: etc/passwd
