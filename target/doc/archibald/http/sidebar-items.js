@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":[["errors",""],["methods",""],["query_string",""],["requests",""],["response",""],["statuscodes",""]]};

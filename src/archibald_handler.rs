@@ -24,9 +24,10 @@ use crate::http::statuscodes::StatusCode;
 use crate::server::ServerHandler;
 use log::info;
 use arch_response::Response;
+use std::path::PathBuf;
 
 // We make use of a Archibald Handler
-use super::http::{methods, arch_requests, arch_response, statuscodes};
+use super::http::{arch_response};
 // use super::http::response::Response;
 // use super::http::Methods;
 // use super::http::StatusCode;
@@ -44,29 +45,30 @@ pub struct ArchibaldHandler {
 
 impl ArchibaldHandler {
     pub fn new<T: Into<String>>(static_path: T) -> Self {
+        let static_path = static_path.into();
+        let canonical_static_path = fs::canonicalize(&static_path)
+            .unwrap_or_else(|_| panic!("Invalid static path: {}", static_path));
+
         Self {
-            // a new handler with the static_path
-            static_path: static_path.into(),
+            static_path: canonical_static_path.to_string_lossy().to_string(),
         }
     }
 
-    /// This is where we could introduce an ugly vulnerability called directory traversal if we do not validate properly.
-    /// What we need to do is check that the path is the absolute path to the static_files directory.
-    /// the file_path is provided by the request and is possibly malicious.
     fn read_file(&self, file_path: &str) -> Option<String> {
-        let path = format!("{}/{}", self.static_path, file_path); // reads the public path. This is actually a vulnerability if we dont check the path
-                                                                  // we can use the fs::canonicalize function to get the absolute path and remove the .. ../
-        match fs::canonicalize(path) {
-            Ok(path) => {
-                /// if the path is valid (exists) and is the static_path we defined, then we can read the file
-                if path.starts_with(&self.static_path) {
-                    fs::read_to_string(path).ok()
+        if file_path.contains("..") {
+            println!("Directory traversal attack attempt detected: {}", file_path);
+            return None;
+        }
+
+        let path = format!("{}/{}", self.static_path, file_path);
+
+        match fs::canonicalize(PathBuf::from(path)) {
+            Ok(canonical_path) => {
+                if canonical_path.starts_with(&self.static_path) {
+                    fs::read_to_string(canonical_path).ok()
                 } else {
-                    println!(
-                        "I say old boy, what are you doing?. This looks like an attack: {}",
-                        file_path
-                    );
-                    return None;
+                    println!("Potential directory traversal attack: {}", file_path);
+                    None
                 }
             }
             Err(_) => None,
@@ -75,31 +77,31 @@ impl ArchibaldHandler {
 }
 
 impl ServerHandler for ArchibaldHandler {
-    /// This handles the request
     fn handle_request(&mut self, request: &Requests) -> Response {
         info!("METHOD {:?} PATH '{}'", request.method(), request.path());
-        match request.method() {
-            // If a GET request is made, we need to check the path and return the appropriate response
-            Allowedmethods::GET => match request.path() {
-                "/" => Response::new(JollyGood, self.read_file("index.html")),
-                // This is the default case where if nothing matches, we return a 404
-                _ => Response::new(StatusCode::NotFound, None),
 
-                path => match self.read_file(path) {
+        match request.method() {
+            Allowedmethods::GET => {
+                let path = if request.path() == "/" {
+                    "index.html"  // Serve index.html if root is requested
+                } else {
+                    &request.path()[1..]  // Serve file directly
+                };
+
+                match self.read_file(path) {
                     Some(content) => Response::new(JollyGood, Some(content)),
-                    None => Response::new(NotFound, None),
-                },
+                    None => Response::new(NotFound, Some("Access Denied".to_string())),
+                }
             },
-            // When we dont have a mapping, we return a 404
-            _ => Response::new(NotFound, Some("Not Found".to_string())),
+            _ => Response::new(NotFound, Some("Method Not Allowed".to_string())),
         }
     }
 
-    fn handle_bad_request(&mut self, e: &crate::http::errors::ParseError) -> Response {
-        todo!()
+    fn handle_bad_request(&mut self, _e: &crate::http::errors::ParseError) -> Response {
+        Response::new(NotFound, Some("Bad Request".to_string()))
     }
 
-    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, crate::http::ParseError> {
-        todo!()
+    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, crate::http::errors::ParseError> {
+        Ok(self.handle_request(request))
     }
 }

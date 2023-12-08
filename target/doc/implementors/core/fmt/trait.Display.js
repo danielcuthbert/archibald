@@ -1,3 +1,0 @@
-(function() {var implementors = {
-"archibald":[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"archibald/http/errors/enum.ParseError.html\" title=\"enum archibald::http::errors::ParseError\">ParseError</a>"],["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.66.0/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"archibald/http/statuscodes/enum.StatusCode.html\" title=\"enum archibald::http::statuscodes::StatusCode\">StatusCode</a>"]]
-};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,6 +1,6 @@
 // We need to specify the public interface of the modules
 
-use std::fmt::Display;
+
 
 pub mod errors;
 pub mod methods;

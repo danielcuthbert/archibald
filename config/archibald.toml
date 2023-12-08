@@ -1,5 +1,14 @@
-[config]
-ip = "127.0.0.1"
+environment = "Development"
+
+[log]
+level = "info"
+
+[server]
+address = "127.0.0.1"
 port = 8080
-static_path = "/static_content"
-default_path = "/"
+
+[port]
+port = 8080
+
+[web]
+static_root = "./static_content"  # Path to your static content

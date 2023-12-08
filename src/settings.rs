@@ -1,10 +1,9 @@
 use std::fmt;
-use std::env;
-use config::{Config, ConfigError, Environment, File};
 use serde::Deserialize;
+use config::{Config, ConfigError, File, ConfigBuilder, builder::DefaultState};
+
 
 const CONFIG_FILE_PATH: &str = "./config/archibald.toml";
-const CONFIG_FILE_PREFIX: &str = "./config";
 
 #[derive(Debug, Deserialize)]
 pub struct Log {
@@ -18,8 +17,8 @@ pub struct Server {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct Port {
-    pub port: u16,
+pub struct WebConfig {
+    pub static_root: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -43,12 +42,17 @@ impl fmt::Display for ENV {
 pub struct Settings {
     pub log: Log,
     pub server: Server,
-    pub port: Port,
     pub environment: ENV,
+    pub web: WebConfig,
 }
 
 impl Settings {
     pub fn new() -> Result<Self, ConfigError> {
-        // existing code
+        let builder = ConfigBuilder::<DefaultState>::default()
+            .add_source(File::with_name(CONFIG_FILE_PATH))
+            .build()?;
+
+        builder.try_deserialize::<Settings>()
     }
 }
+

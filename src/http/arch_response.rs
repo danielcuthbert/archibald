@@ -9,10 +9,7 @@
 // We define a struct to hold all the data we need to send back to the client
 use super::StatusCode;
 use std::io::{Result as IoResult, Write};
-use std::{
-    fmt::{Display, Formatter, Result as FmtResult},
-    net::TcpStream,
-}; // same as FMT so we call it something else here
+ // same as FMT so we call it something else here
 
 #[derive(Debug)]
 pub struct Response {

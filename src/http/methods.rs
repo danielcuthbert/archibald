@@ -1,4 +1,4 @@
-use crate::http::methods::Allowedmethods as OtherAllowedmethods;
+
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
