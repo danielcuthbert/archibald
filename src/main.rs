@@ -1,6 +1,6 @@
 use archibald_handler::ArchibaldHandler;
 
-use http::methods::Allowedmethods;
+
 
 use server::Server;
 
@@ -14,7 +14,7 @@ use log::LevelFilter;
 use simplelog::*;
 use std::fs::File;
 use std::fs::OpenOptions;
-use std::{fs, process::exit};
+
 
 // #[derive(Deserialize)]
 // struct ArchibaldConfig {
@@ -34,7 +34,7 @@ fn main() {
     let settings = Settings::new().expect("Config loading failed");
 
     // Create a log file
-    let log_file = File::create("archibald_server.log").unwrap();
+    let _log_file = File::create("archibald_server.log").unwrap();
 
     // Open log file in append mode
     let log_file = OpenOptions::new()

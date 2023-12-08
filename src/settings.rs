@@ -1,4 +1,4 @@
-use ::config::{builder::DefaultState, Config, ConfigBuilder, ConfigError, File};
+use ::config::{builder::DefaultState, ConfigBuilder, ConfigError, File};
 use serde::Deserialize;
 use std::fmt;
 

@@ -20,7 +20,7 @@ use crate::http::arch_requests::Requests;
 
 // use crate::http::statuscodes;
 use crate::http::methods::Allowedmethods;
-use crate::http::statuscodes::StatusCode;
+
 use crate::http::validation;
 use crate::server::ServerHandler;
 use arch_response::Response;

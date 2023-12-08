@@ -1,5 +1,9 @@
 use super::methods::Allowedmethods;
 use crate::http::errors::ParseError;
+use mime_guess::from_path;
+use std::fs::File;
+use std::path::Path;
+use std::io::prelude::*;
 
 mod validation {
     use crate::http::errors::ParseError;
@@ -9,7 +13,7 @@ mod validation {
     pub fn sanitize_input(input: &str) -> String {
         input
             .chars()
-            .filter(|&c| c.is_alphanumeric() || c.is_whitespace())
+            .filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c.is_whitespace())
             .collect()
     }
 
@@ -28,6 +32,8 @@ pub struct Requests<'buf> {
     path: &'buf str,
     method: Allowedmethods,
     query_string: Option<&'buf str>,
+    file_contents: Option<Vec<u8>>, // needed to serve images
+    mime_type: Option<String>, // needed to serve images
 }
 
 impl std::fmt::Display for Requests<'_> {
@@ -42,6 +48,8 @@ impl<'buf> Requests<'buf> {
             path,
             method,
             query_string,
+            file_contents: None,
+            mime_type: None,
         }
     }
 
@@ -53,15 +61,41 @@ impl<'buf> Requests<'buf> {
         &self.method
     }
 
+    pub fn query_string(&self) -> Option<&str> {
+        self.query_string
+    }
+
     pub fn validate_input(&self) -> Result<(), ParseError> {
         let sanitized_path = validation::sanitize_input(self.path());
         validation::validate_input(&sanitized_path)
     }
 
-    pub fn query_string(&self) -> Option<&str> {
-        self.query_string
+    pub fn set_file_contents(&mut self, contents: Vec<u8>) {
+        self.file_contents = Some(contents);
+    }
+
+    pub fn set_mime_type(&mut self, mime_type: String) {
+        self.mime_type = Some(mime_type);
+    }
+
+    pub fn handle_request(&mut self) -> Result<(), ParseError> {
+        self.validate_input()?;
+
+        let sanitized_path = validation::sanitize_input(self.path());
+        if self.method == Allowedmethods::GET && sanitized_path.starts_with("/static") {
+            let file_path = Path::new(&sanitized_path);
+            let file_contents = read_binary_file(&file_path)
+                .map_err(|_| ParseError::NotFound(404))?;
+            let mime_type = get_mime_type(&file_path);
+
+            self.set_file_contents(file_contents);
+            self.set_mime_type(mime_type);
+        }
+
+        Ok(())
     }
 }
+
 
 impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
     type Error = ParseError;
@@ -83,12 +117,21 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
         }
 
         let method: Allowedmethods = method.parse()?;
-        // You need to extract the query string from the path here, if it exists.
-        // For now, I'm assuming the whole path is being passed.
-        let request = Requests::new(path, method, None); // Adjust according to how query_string should be handled
+        let request = Requests::new(path, method, None);
 
         Ok(request)
     }
+}
+
+fn read_binary_file(file_path: &Path) -> std::io::Result<Vec<u8>> {
+    let mut file = File::open(file_path)?;
+    let mut buffer = Vec::new();
+    file.read_to_end(&mut buffer)?;
+    Ok(buffer)
+}
+
+fn get_mime_type(file_path: &Path) -> String {
+    from_path(file_path).first_or_octet_stream().to_string()
 }
 
 fn parse_request(request: &str) -> Option<(&str, &str)> {
