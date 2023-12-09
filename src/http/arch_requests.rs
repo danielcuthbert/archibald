@@ -95,7 +95,7 @@ impl<'buf> Requests<'buf> {
         self.file_contents = Some(contents);
     }
 
-    pub fn get_mime_type(&mut self, mime_type: String) {
+    pub fn set_mime_type(&mut self, mime_type: String) {
         self.mime_type = Some(mime_type);
     }
 
@@ -169,7 +169,7 @@ fn read_binary_file(file_path: &Path) -> std::io::Result<Vec<u8>> {
 }
 
 
-fn get_mime_type(file_path: &Path) -> String {
+pub fn get_mime_type(file_path: &Path) -> String {
     from_path(file_path).first_or_octet_stream().to_string()
 }
 

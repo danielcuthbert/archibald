@@ -1,48 +1,19 @@
-use crate::http::arch_requests::Requests;
-/**
-* Archibald: a loyal web server
-* This holds the implementation of the handler
-* Author: @danielcuthbert
-*
-**/
-// The ArchibaldHandler struct holds the path to the directory containing the static files. The new method is used to create a new instance of the ArchibaldHandler struct with the given static path.
+use crate::http::{arch_requests::Requests, arch_response};
 
-// The read_file method is used to read a file from the static directory. It takes a file path as an argument and returns the contents of the file as a String.
-// The method first constructs the absolute path to the file by concatenating the static path and the file path. It then checks if the absolute path is valid and starts with the static path.
-// If the path is valid, it reads the contents of the file and returns it as a String. If the path is not valid, it returns None.
-
-// The handle_request method is used to handle incoming HTTP requests. It takes a Request object as an argument and returns a Response object.
-// The method first logs the HTTP method and path of the request. If the request method is GET, it checks the request path and returns the appropriate response.
-// If the request path is /, it returns the contents of the index.html file. If the request path is not /, it reads the file with the given path and returns its contents.
-// If the request method is not GET, it returns a 404 Not Found response.
-
-// The handle_bad_request method is not implemented and is currently a stub. It takes a ParseError object as an argument and returns a Response object.
-
-// use crate::http::statuscodes;
 use crate::http::methods::Allowedmethods;
-
 use crate::http::validation;
 use crate::server::ServerHandler;
 use arch_response::Response;
 use log::{info, warn};
-// use std::path::PathBuf;
+use mime_guess::from_path;
+use std::fs;
+use std::path::Path;
 
-// We make use of a Archibald Handler
-use super::http::arch_response;
-// use super::http::response::Response;
-// use super::http::Methods;
-// use super::http::StatusCode;
 use super::http::statuscodes::StatusCode::{JollyGood, NotFound};
 
-use std::fs;
-
-/// this is the main handler module
-/// This is for the static_files directory where we serve content from the filesystem.
 pub struct ArchibaldHandler {
     static_path: String,
 }
-
-/// In order to serve the basic index.html page, we need a new handler
 
 impl ArchibaldHandler {
     pub fn new<T: Into<String>>(static_path: T) -> Self {
@@ -55,7 +26,7 @@ impl ArchibaldHandler {
         }
     }
 
-    fn read_file(&self, file_path: &str) -> Option<String> {
+    fn read_file(&self, file_path: &str) -> Option<Vec<u8>> {
         let sanitized_path = validation::sanitize_input(file_path);
         info!("Sanitized path: {}", sanitized_path);
 
@@ -64,18 +35,14 @@ impl ArchibaldHandler {
             return None;
         }
 
-        let path = format!(
-            "{}/{}",
-            self.static_path,
-            sanitized_path.strip_prefix('/').unwrap_or(&sanitized_path)
-        );
+        let path = format!("{}/{}", self.static_path, sanitized_path);
         info!("Attempting to read file at path: {}", path);
 
         match fs::canonicalize(&path) {
             Ok(canonical_path) => {
                 info!("Canonical path: {}", canonical_path.display());
                 if canonical_path.starts_with(&self.static_path) {
-                    fs::read_to_string(canonical_path).ok()
+                    fs::read(canonical_path).ok()
                 } else {
                     warn!("Potential security risk detected: {}", file_path);
                     None
@@ -99,19 +66,27 @@ impl ServerHandler for ArchibaldHandler {
 
         match request.method() {
             Allowedmethods::GET => {
-                let path = if request.path() == "/" {
+                let file_path = if request.path() == "/" {
                     "index.html" // Serve index.html if root is requested
                 } else {
                     &request.path()[1..] // Serve file directly
                 };
 
-                match self.read_file(path) {
+                let path = Path::new(&file_path);
+                let mime_type = from_path(path).first_or_octet_stream().to_string();
+
+                match self.read_file(file_path) {
                     Some(content) => {
-                        info!("Serving file: {}", path);
-                        Response::new(JollyGood, Some(content))
-                    }
+                        if mime_type.starts_with("text/") || mime_type == "application/javascript" {
+                            // Handle as text
+                            Response::new(JollyGood, Some(String::from_utf8_lossy(&content).to_string()))
+                        } else {
+                            // Handle as binary
+                            Response::new_with_binary(JollyGood, content)
+                        }
+                    },
                     None => {
-                        warn!("File not found or access denied: {}", path);
+                        warn!("File not found or access denied: {}", file_path);
                         Response::new(NotFound, Some("Access Denied".to_string()))
                     }
                 }
