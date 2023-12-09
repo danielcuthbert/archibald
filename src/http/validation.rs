@@ -28,11 +28,17 @@ impl Display for ValidationParseError {
 impl Error for ValidationParseError {}
 
 pub fn sanitize_input(input: &str) -> String {
-    let re = Regex::new(r"[^\w\s./-]").expect("Invalid regex pattern"); // Allow dots, slashes, and hyphens
+    println!("Original path: {}", input); // Log the original path
+
+    let re = Regex::new(r"[^\w\s./-]").expect("Invalid regex pattern");
     let sanitized = re.replace_all(input, "").to_string();
 
     // Replace any '..' sequences to prevent directory traversal attacks
-    sanitized.replace("..", "")
+    let final_sanitized = sanitized.replace("../", "").replace("/../", "");
+
+    println!("Sanitized path: {}", final_sanitized); // Log the sanitized path
+
+    final_sanitized
 }
 
 pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
@@ -63,4 +69,3 @@ pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
 
     Ok(())
 }
-

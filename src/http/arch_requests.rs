@@ -1,22 +1,28 @@
-use crate::http::methods::Allowedmethods;
 use crate::http::errors::ParseError;
-use crate::http::Response;  // Import Response
-use crate::http::StatusCode;  // Import StatusCode
+use crate::http::methods::Allowedmethods;
+use crate::http::Response; // Import Response
+use crate::http::StatusCode; // Import StatusCode
 use mime_guess::from_path;
 use std::fs::File;
-use std::path::Path;
-use std::io::prelude::*;
 use std::io;
+use std::io::prelude::*;
+use std::path::Path;
 
 mod validation {
     use crate::http::errors::ParseError;
     use std::path::Path;
-    
 
     pub fn sanitize_input(input: &str) -> String {
         input
             .chars()
-            .filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c == '-' || c == '_' || c.is_whitespace())
+            .filter(|&c| {
+                c.is_alphanumeric()
+                    || c == '/'
+                    || c == '.'
+                    || c == '-'
+                    || c == '_'
+                    || c.is_whitespace()
+            })
             .collect()
     }
 
@@ -30,15 +36,13 @@ mod validation {
     }
 }
 
-
-
 #[derive(Debug)]
 pub struct Requests<'buf> {
     path: &'buf str,
     method: Allowedmethods,
     query_string: Option<&'buf str>,
     file_contents: Option<Vec<u8>>, // needed to serve images
-    mime_type: Option<String>, // needed to serve images
+    mime_type: Option<String>,      // needed to serve images
 }
 
 impl std::fmt::Display for Requests<'_> {
@@ -65,12 +69,19 @@ impl<'buf> Requests<'buf> {
     pub fn method(&self) -> &Allowedmethods {
         &self.method
     }
-pub fn sanitize_input(input: &str) -> String {
-    input
-        .chars()
-        .filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c == '-' || c == '_' || c.is_whitespace())
-        .collect()
-}
+    pub fn sanitize_input(input: &str) -> String {
+        input
+            .chars()
+            .filter(|&c| {
+                c.is_alphanumeric()
+                    || c == '/'
+                    || c == '.'
+                    || c == '-'
+                    || c == '_'
+                    || c.is_whitespace()
+            })
+            .collect()
+    }
     pub fn query_string(&self) -> Option<&str> {
         self.query_string
     }
@@ -84,30 +95,27 @@ pub fn sanitize_input(input: &str) -> String {
         self.file_contents = Some(contents);
     }
 
-    pub fn set_mime_type(&mut self, mime_type: String) {
+    pub fn get_mime_type(&mut self, mime_type: String) {
         self.mime_type = Some(mime_type);
     }
 
     pub fn handle_request(&mut self, stream: &mut impl Write) -> Result<(), ParseError> {
         self.validate_input()?;
-    
+
         let sanitized_path = validation::sanitize_input(self.path());
         if self.method == Allowedmethods::GET {
             if sanitized_path.starts_with("/static") {
                 let file_path = Path::new(&sanitized_path);
-                let file_contents = read_binary_file(&file_path)
-                    .map_err(|_| ParseError::NotFound(404))?;
+                let file_contents =
+                    read_binary_file(&file_path).map_err(|_| ParseError::NotFound(404))?;
                 let mime_type = get_mime_type(&file_path);
-    
-                if mime_type.starts_with("image/") {
-                    let file_contents = read_binary_file(&file_path)
-                        .map_err(|_| ParseError::NotFound(404))?;
 
+                if mime_type.starts_with("image/") {
                     let response = Response::new_with_binary(StatusCode::JollyGood, file_contents);
-                    response.send(stream)?;
+                response.send(stream)?;
                 } else {
-                    let file_contents = read_text_file(&file_path)
-                        .map_err(|_| ParseError::NotFound(404))?;
+                    let file_contents =
+                        read_text_file(&file_path).map_err(|_| ParseError::NotFound(404))?;
 
                     let response = Response::new(StatusCode::JollyGood, Some(file_contents));
                     response.send(stream)?;
@@ -116,11 +124,10 @@ pub fn sanitize_input(input: &str) -> String {
                 // Handle other paths
             }
         }
-    
+
         Ok(())
     }
 }
-
 
 impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
     type Error = ParseError;
@@ -149,11 +156,18 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
 }
 
 fn read_binary_file(file_path: &Path) -> std::io::Result<Vec<u8>> {
-    let mut file = File::open(file_path)?;
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(e) => {
+            println!("Error opening file: {}", e); // Log the specific error
+            return Err(e);
+        },
+    };
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
     Ok(buffer)
 }
+
 
 fn get_mime_type(file_path: &Path) -> String {
     from_path(file_path).first_or_octet_stream().to_string()

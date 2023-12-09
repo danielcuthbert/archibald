@@ -20,11 +20,19 @@ pub struct Response {
 
 impl Response {
     pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
-        Response { status_code, body, binary_body: None }
+        Response {
+            status_code,
+            body,
+            binary_body: None,
+        }
     }
 
     pub fn new_with_binary(status_code: StatusCode, binary_body: Vec<u8>) -> Self {
-        Response { status_code, body: None, binary_body: Some(binary_body) }
+        Response {
+            status_code,
+            body: None,
+            binary_body: Some(binary_body),
+        }
     }
 
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {

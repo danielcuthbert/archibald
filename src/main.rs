@@ -1,7 +1,5 @@
 use archibald_handler::ArchibaldHandler;
 
-
-
 use server::Server;
 
 mod archibald_handler;
@@ -14,7 +12,6 @@ use log::LevelFilter;
 use simplelog::*;
 use std::fs::File;
 use std::fs::OpenOptions;
-
 
 // #[derive(Deserialize)]
 // struct ArchibaldConfig {

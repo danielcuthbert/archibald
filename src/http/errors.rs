@@ -1,8 +1,8 @@
+use super::methods::MethodError;
 use std::error::Error;
 use std::fmt::{Debug, Display, Formatter, Result as FmtResult};
-use std::str::Utf8Error;
 use std::io;
-use super::methods::MethodError;
+use std::str::Utf8Error;
 
 #[non_exhaustive]
 pub enum ParseError {
