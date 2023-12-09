@@ -28,8 +28,11 @@ impl Display for ValidationParseError {
 impl Error for ValidationParseError {}
 
 pub fn sanitize_input(input: &str) -> String {
-    let re = Regex::new(r"[^\w\s./]").expect("Invalid regex pattern"); // Allow dots and slashes
-    re.replace_all(input, "").to_string()
+    let re = Regex::new(r"[^\w\s./-]").expect("Invalid regex pattern"); // Allow dots, slashes, and hyphens
+    let sanitized = re.replace_all(input, "").to_string();
+
+    // Replace any '..' sequences to prevent directory traversal attacks
+    sanitized.replace("..", "")
 }
 
 pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
@@ -41,15 +44,17 @@ pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
         return Err(ValidationParseError::InvalidMethod);
     }
 
-    if path.contains('\'') || path.contains('\"') || path.contains(';') {
+    // Check for any other potentially dangerous characters or sequences in the path
+    if path.contains('\'') || path.contains('\"') || path.contains(';') || path.contains("..") {
         return Err(ValidationParseError::MaliciousPath);
     }
 
     if let Some(query_string) = query_string {
         for pair in query_string.split('&') {
             let parts: Vec<&str> = pair.split('=').collect();
-            if let Some(key) = parts.get(0) {
-                if key.contains('\'') || key.contains('\"') || key.contains(';') {
+            // Check both the key and the value for potentially dangerous characters
+            for part in parts {
+                if part.contains('\'') || part.contains('\"') || part.contains(';') {
                     return Err(ValidationParseError::MaliciousQueryString);
                 }
             }
@@ -58,3 +63,4 @@ pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
 
     Ok(())
 }
+

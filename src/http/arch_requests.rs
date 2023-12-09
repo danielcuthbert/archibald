@@ -1,19 +1,22 @@
-use super::methods::Allowedmethods;
+use crate::http::methods::Allowedmethods;
 use crate::http::errors::ParseError;
+use crate::http::Response;  // Import Response
+use crate::http::StatusCode;  // Import StatusCode
 use mime_guess::from_path;
 use std::fs::File;
 use std::path::Path;
 use std::io::prelude::*;
+use std::io;
 
 mod validation {
     use crate::http::errors::ParseError;
     use std::path::Path;
-    // use std::error::Error;
+    
 
     pub fn sanitize_input(input: &str) -> String {
         input
             .chars()
-            .filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c.is_whitespace())
+            .filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c == '-' || c == '_' || c.is_whitespace())
             .collect()
     }
 
@@ -26,6 +29,8 @@ mod validation {
         Ok(())
     }
 }
+
+
 
 #[derive(Debug)]
 pub struct Requests<'buf> {
@@ -60,7 +65,12 @@ impl<'buf> Requests<'buf> {
     pub fn method(&self) -> &Allowedmethods {
         &self.method
     }
-
+pub fn sanitize_input(input: &str) -> String {
+    input
+        .chars()
+        .filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c == '-' || c == '_' || c.is_whitespace())
+        .collect()
+}
     pub fn query_string(&self) -> Option<&str> {
         self.query_string
     }
@@ -78,20 +88,35 @@ impl<'buf> Requests<'buf> {
         self.mime_type = Some(mime_type);
     }
 
-    pub fn handle_request(&mut self) -> Result<(), ParseError> {
+    pub fn handle_request(&mut self, stream: &mut impl Write) -> Result<(), ParseError> {
         self.validate_input()?;
-
+    
         let sanitized_path = validation::sanitize_input(self.path());
-        if self.method == Allowedmethods::GET && sanitized_path.starts_with("/static") {
-            let file_path = Path::new(&sanitized_path);
-            let file_contents = read_binary_file(&file_path)
-                .map_err(|_| ParseError::NotFound(404))?;
-            let mime_type = get_mime_type(&file_path);
+        if self.method == Allowedmethods::GET {
+            if sanitized_path.starts_with("/static") {
+                let file_path = Path::new(&sanitized_path);
+                let file_contents = read_binary_file(&file_path)
+                    .map_err(|_| ParseError::NotFound(404))?;
+                let mime_type = get_mime_type(&file_path);
+    
+                if mime_type.starts_with("image/") {
+                    let file_contents = read_binary_file(&file_path)
+                        .map_err(|_| ParseError::NotFound(404))?;
 
-            self.set_file_contents(file_contents);
-            self.set_mime_type(mime_type);
+                    let response = Response::new_with_binary(StatusCode::JollyGood, file_contents);
+                    response.send(stream)?;
+                } else {
+                    let file_contents = read_text_file(&file_path)
+                        .map_err(|_| ParseError::NotFound(404))?;
+
+                    let response = Response::new(StatusCode::JollyGood, Some(file_contents));
+                    response.send(stream)?;
+                }
+            } else {
+                // Handle other paths
+            }
         }
-
+    
         Ok(())
     }
 }
@@ -136,4 +161,11 @@ fn get_mime_type(file_path: &Path) -> String {
 
 fn parse_request(request: &str) -> Option<(&str, &str)> {
     request.split_once(' ').or_else(|| request.split_once('\r'))
+}
+
+fn read_text_file(file_path: &Path) -> std::io::Result<String> {
+    let mut file = File::open(file_path)?;
+    let mut buffer = String::new();
+    file.read_to_string(&mut buffer)?;
+    Ok(buffer)
 }

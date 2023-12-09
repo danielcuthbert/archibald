@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' 'unsafe-eval';" /> -->
     <title>Archibald Default Page</title>
 
     <!-- Bootstrap 5 CSS -->
@@ -72,7 +73,7 @@
 <body>
     <!-- Logo Image -->
     <div class="text-center my-4">
-      <img src="img/logo.png" alt="Archibald Butler Logo" style="max-width: 200px;">
+      <img src="img/logo.jpg" alt="Archibald Butler Logo" style="max-width: 200px;">
   </div>
     <h1>How May I Serve You?</h1>
 
@@ -90,19 +91,10 @@
         <div class="card-body">
             <p>It is only here for demonstration purposes</p>
             <p>The following still needs to be done:</p>
-
-            <!-- List with Icons -->
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                    <i class="bi bi-check-circle-fill"></i> Implement proper environment variable reading for static_content directory
-                </li>
-                <li class="list-group-item">
-                    <i class="bi bi-check-circle-fill"></i> Implement TLS and PQC
-                </li>
-            </ul>
+            <p><i class="bi bi-check-circle-fill"></i> Implement proper environment variable reading for static_content directory</p>
+            <p><i class="bi bi-check-circle-fill"></i> Implement TLS and PQC</p>
         </div>
     </div>
-
     <!-- User Input Form -->
     <form id="userForm">
         <div class="form-group">

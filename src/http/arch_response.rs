@@ -15,25 +15,44 @@ use std::io::{Result as IoResult, Write};
 pub struct Response {
     status_code: StatusCode,
     body: Option<String>,
+    binary_body: Option<Vec<u8>>,
 }
 
 impl Response {
     pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
-        Response { status_code, body }
+        Response { status_code, body, binary_body: None }
+    }
+
+    pub fn new_with_binary(status_code: StatusCode, binary_body: Vec<u8>) -> Self {
+        Response { status_code, body: None, binary_body: Some(binary_body) }
     }
 
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
-        let body = self.body.as_deref().unwrap_or("");
-        let content_length = body.len();
+        let content_length = if let Some(body) = &self.body {
+            write!(
+                stream,
+                "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n{}",
+                self.status_code,
+                self.status_code.http_status_reason_phrase(),
+                body.len(),
+                body
+            )?;
+            body.len()
+        } else if let Some(binary_body) = &self.binary_body {
+            write!(
+                stream,
+                "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n",
+                self.status_code,
+                self.status_code.http_status_reason_phrase(),
+                binary_body.len()
+            )?;
+            stream.write_all(binary_body)?;
+            binary_body.len()
+        } else {
+            0
+        };
 
-        write!(
-            stream,
-            "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n{}",
-            self.status_code,
-            self.status_code.http_status_reason_phrase(),
-            content_length,
-            body
-        )
+        Ok(())
     }
 }
 
