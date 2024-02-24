@@ -1,5 +1,0 @@
-query_string = "?" { key_value / key_value }
-
-key_value = key "=" value
-key = [a-zA-Z0-9_-]* // Only allow alphanumeric, underscore, and hyphen
-value = ... // Define allowed characters based on context (use pest_escape?)

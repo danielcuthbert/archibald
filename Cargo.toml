@@ -16,6 +16,5 @@ serde_derive = "1.0.171"
 toml = "0.5.10"
 config = "0.12"
 simplelog = "0.12.1"
-pest = "2.7.7"
-pest_derive = "2.1"
+
 

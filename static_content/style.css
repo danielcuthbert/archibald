@@ -1,0 +1,82 @@
+body {
+    font-family: "Lato", sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+  }
+  
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+  
+  header {
+    background-color: #e0f2fe;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+  }
+  
+  .logo {
+    font-size: 24px;
+    margin-bottom: 10px;
+  }
+  
+  .warning-box {
+    background-color: #f2dede;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .user-form {
+    text-align: left;
+  }
+  
+  .user-form h2 {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .form-control {
+    border: 1px solid #c7eafb;
+    border-radius: 3px;
+    padding: 5px 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+  }
+  
+  .btn {
+    background-color: #3aa9dc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    margin-top: 10px;
+  }
+  
+  .btn:hover {
+    background-color: #2d89c6;
+  }
+  
+  .greeting {
+    font-size: 22px;
+    margin: 20px 0;
+  }
+  
+  .information-card,
+  .new-features {
+    background-color: #f0f2fe;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .information-card h2,
+  .new-features h2 {
+    font-size:
+  
