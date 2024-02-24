@@ -7,10 +7,12 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 use std::path::Path;
+use std::io::ErrorKind;
+use std::fs;
 
 mod validation {
-    use crate::http::errors::ParseError;
-    use std::path::Path;
+    use crate::http::{errors::ParseError, validation};
+    use std::{path::Path, io::ErrorKind, fs};
 
     pub fn sanitize_input(input: &str) -> String {
         input
@@ -26,14 +28,28 @@ mod validation {
             .collect()
     }
 
-    pub fn validate_input(path: &str) -> Result<(), ParseError> {
-        if !Path::new(path).exists() {
-            // Convert the std::io::Error into your ParseError type
-            return Err(ParseError::NotFound(404));
+    pub fn validate_input() -> Result<(), ParseError> {
+        let input = ""; // Add the missing input variable
+        let sanitized_path = validation::sanitize_input(input);
+    
+        if !Path::new(&sanitized_path).exists() {
+            let file_error = fs::metadata(&sanitized_path).err().unwrap();
+    
+            match file_error.kind() {
+                ErrorKind::NotFound => return Err(ParseError::NotFound(404)),
+                ErrorKind::PermissionDenied => {
+                    return Err(ParseError::IOError(format!(
+                        "File permission error: {}",
+                        file_error.to_string(),
+                    )))
+                }
+                _ => return Err(ParseError::IOError(file_error.to_string())),
+            }
         }
-
+    
         Ok(())
     }
+    
 }
 
 #[derive(Debug)]
@@ -88,7 +104,7 @@ impl<'buf> Requests<'buf> {
 
     pub fn validate_input(&self) -> Result<(), ParseError> {
         let sanitized_path = validation::sanitize_input(self.path());
-        validation::validate_input(&sanitized_path)
+        validation::validate_input()
     }
 
     pub fn set_file_contents(&mut self, contents: Vec<u8>) {

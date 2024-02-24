@@ -86,15 +86,52 @@
         </div>
     </div>
 
+    <!-- User Input Form -->
+    <form id="userForm">
+        <div class="form-group">
+            <label for="userName">Enter your name:</label>
+            <input type="text" id="userName" name="userName" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+
+    <p id="greetingText" class="mt-4"></p>
+
+    <script>
+        document.getElementById("userForm").onsubmit = function(event) {
+            event.preventDefault();
+            var userName = document.getElementById("userName").value;
+            document.getElementById("greetingText").innerText = "Hello, " + userName + "!";
+        };
+    </script>
+
     <!-- Card for Other Information -->
     <div class="card my-4">
         <div class="card-body">
+            <h2>Other Information</h2>
             <p>It is only here for demonstration purposes</p>
-            <p>The following still needs to be done:</p>
-            <p><i class="bi bi-check-circle-fill"></i> Implement proper environment variable reading for static_content directory</p>
-            <p><i class="bi bi-check-circle-fill"></i> Implement TLS and PQC</p>
+            <ul class="list-group">
+                <li class="list-group-item"><i class="bi bi-check-circle-fill"></i> Implement proper environment variable reading for static_content directory</li>
+                <li class="list-group-item"><i class="bi bi-check-circle-fill"></i> Implement TLS and PQC</li>
+            </ul>
         </div>
     </div>
+
+    <!-- New Features based on Version Number -->
+    <div class="card my-4">
+        <div class="card-body">
+            <h2>New Features</h2>
+            <p>Based on the latest version number, here are the new features:</p>
+            <ul class="list-group">
+                <li class="list-group-item"><i class="bi bi-check-circle-fill"></i> Added option to edit settings via <i>orders/archibald.toml</i> config file</li>
+                <li class="list-group-item"><i class="bi bi-check-circle-fill"></i> Working on better error reporting (a WIP)</li>
+                <li class="list-group-item"><i class="bi bi-check-circle-fill"></i> Added a pest_grammar.pest file for validation</li>
+            </ul>
+        </div>
+    </div>
+
+    </body>
+    </html>
     <!-- User Input Form -->
     <form id="userForm">
         <div class="form-group">

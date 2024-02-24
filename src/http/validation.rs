@@ -1,31 +1,49 @@
 use crate::http::arch_requests::Requests;
-use crate::http::methods::Allowedmethods;
+use pest::Parser; // The Parser trait
+use pest::error::Error as PestError; // The PestError type
+use pest_derive::Parser; // The Parser derive macro
 use regex::Regex;
 use std::error::Error;
 use std::fmt::{Display, Formatter};
 
+
+use path_grammar::Rule;
+use query_string_grammar::Rule;
+
+#[derive(Parser)]
+#[grammar = "./path_grammar.pest"]
+struct PathParser;
+
+#[derive(Parser)]
+#[grammar = "./query_string_grammar.pest"]
+struct QueryStringParser;
+
+impl pest::Parser<Rule> for PathParser {}
+impl pest::Parser<Rule> for QueryStringParser {}
+
 #[derive(Debug)]
-pub enum ValidationParseError {
+pub enum ValidationParseError<'a> {
     InvalidMethod,
-    MaliciousPath,
-    MaliciousQueryString,
-    InvalidRegex, // Added to handle regex errors
+    MalformedPath(PestError<Rule<'a>>),
+    MalformedQueryString(PestError<Rule<'a>>),
+    VulnerablePath,
+    VulnerableQueryString,
 }
 
-impl Display for ValidationParseError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+impl<'a> Display for ValidationParseError<'a> {
+    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
         match *self {
             ValidationParseError::InvalidMethod => write!(f, "Invalid method"),
-            ValidationParseError::MaliciousPath => write!(f, "Malicious path detected"),
-            ValidationParseError::MaliciousQueryString => {
-                write!(f, "Malicious query string detected")
-            }
-            ValidationParseError::InvalidRegex => write!(f, "Invalid regex pattern"),
+            ValidationParseError::VulnerablePath => write!(f, "Malicious path detected"),
+            ValidationParseError::VulnerableQueryString => write!(f, "Malicious query string detected"),
+            ValidationParseError::MalformedPath(_) => write!(f, "Malformed path: {}", self),
+            ValidationParseError::MalformedQueryString(_) => write!(f, "Malformed query string: {}", self),
+            // Add handling for other cases as needed
         }
     }
 }
 
-impl Error for ValidationParseError {}
+impl<'a> Error for ValidationParseError<'a> {}
 
 pub fn sanitize_input(input: &str) -> String {
     println!("Original path: {}", input); // Log the original path
@@ -41,28 +59,30 @@ pub fn sanitize_input(input: &str) -> String {
     final_sanitized
 }
 
-pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
-    let method = request.method();
+pub fn validate_input<'a>(request: &'a Requests) -> Result<(), ValidationParseError<'a>> {
+
     let path = request.path();
     let query_string = request.query_string();
 
-    if !Allowedmethods::is_valid(method) {
-        return Err(ValidationParseError::InvalidMethod);
+    // Validate the path using the PathParser
+    match PathParser::parse(Rule::path, path) {
+        Ok(_) => {}
+        Err(err) => return Err(ValidationParseError::MalformedPath(err)),
     }
 
-    // Check for any other potentially dangerous characters or sequences in the path
-    if path.contains('\'') || path.contains('\"') || path.contains(';') || path.contains("..") {
-        return Err(ValidationParseError::MaliciousPath);
-    }
-
+    // Only proceed if there is a query string
     if let Some(query_string) = query_string {
-        for pair in query_string.split('&') {
-            let parts: Vec<&str> = pair.split('=').collect();
-            // Check both the key and the value for potentially dangerous characters
-            for part in parts {
-                if part.contains('\'') || part.contains('\"') || part.contains(';') {
-                    return Err(ValidationParseError::MaliciousQueryString);
-                }
+        let query_parser = QueryStringParser::parse(Rule::query_string, query_string)
+            .map_err(ValidationParseError::MalformedQueryString)?;
+
+        // Iterate through the parsed key-value pairs
+        for pair in query_parser {
+            let key = pair.as_str(); // Adjust based on your grammar
+            let value = pair.as_str(); // Adjust based on your grammar
+
+            // Basic checks for vulnerabilities in keys and values
+            if key.contains('\'') || key.contains('\"') || key.contains(';') || value.contains('\'') || value.contains('\"') || value.contains(';') {
+                return Err(ValidationParseError::VulnerableQueryString);
             }
         }
     }

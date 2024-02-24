@@ -1,6 +1,8 @@
 use ::config::{builder::DefaultState, ConfigBuilder, ConfigError, File};
 use serde::Deserialize;
 use std::fmt;
+use std::path::PathBuf;
+use std::str::FromStr;
 
 const CONFIG_FILE_PATH: &str = "./orders/archibald.toml";
 
@@ -51,6 +53,17 @@ impl Settings {
             .add_source(File::with_name(CONFIG_FILE_PATH))
             .build()?;
 
-        builder.try_deserialize::<Settings>()
+        let settings = builder.try_deserialize::<Settings>()?;
+
+        // Validate static_root path
+        let static_root = PathBuf::from_str(&settings.web.static_root).unwrap();
+
+        if !static_root.exists() || !static_root.is_dir() {
+            return Err(ConfigError::Message(
+                "Invalid static_root path: path does not exist or is not a directory".to_string(),
+            ));
+        }
+
+        Ok(settings)
     }
 }

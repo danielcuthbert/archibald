@@ -1,3 +1,5 @@
+# archibald.toml
+
 environment = "Development"
 
 [log]
@@ -7,8 +9,5 @@ level = "info"
 address = "127.0.0.1"
 port = 8080
 
-[port]
-port = 8080
-
 [web]
-static_root = "./static_content"  # Path to your static content
+static_root = "./static_content"
