@@ -79,12 +79,15 @@ impl ServerHandler for ArchibaldHandler {
                     Some(content) => {
                         if mime_type.starts_with("text/") || mime_type == "application/javascript" {
                             // Handle as text
-                            Response::new(JollyGood, Some(String::from_utf8_lossy(&content).to_string()))
+                            Response::new(
+                                JollyGood,
+                                Some(String::from_utf8_lossy(&content).to_string()),
+                            )
                         } else {
                             // Handle as binary
                             Response::new_with_binary(JollyGood, content)
                         }
-                    },
+                    }
                     None => {
                         warn!("File not found or access denied: {}", file_path);
                         Response::new(NotFound, Some("Access Denied".to_string()))

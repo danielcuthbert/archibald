@@ -3,16 +3,16 @@ use crate::http::methods::Allowedmethods;
 use crate::http::Response; // Import Response
 use crate::http::StatusCode; // Import StatusCode
 use mime_guess::from_path;
+use std::fs;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use std::path::Path;
 use std::io::ErrorKind;
-use std::fs;
+use std::path::Path;
 
 mod validation {
     use crate::http::{errors::ParseError, validation};
-    use std::{path::Path, io::ErrorKind, fs};
+    use std::{fs, io::ErrorKind, path::Path};
 
     pub fn sanitize_input(input: &str) -> String {
         input
@@ -31,10 +31,10 @@ mod validation {
     pub fn validate_input() -> Result<(), ParseError> {
         let input = ""; // Add the missing input variable
         let sanitized_path = validation::sanitize_input(input);
-    
+
         if !Path::new(&sanitized_path).exists() {
             let file_error = fs::metadata(&sanitized_path).err().unwrap();
-    
+
             match file_error.kind() {
                 ErrorKind::NotFound => return Err(ParseError::NotFound(404)),
                 ErrorKind::PermissionDenied => {
@@ -46,10 +46,9 @@ mod validation {
                 _ => return Err(ParseError::IOError(file_error.to_string())),
             }
         }
-    
+
         Ok(())
     }
-    
 }
 
 #[derive(Debug)]
@@ -128,7 +127,7 @@ impl<'buf> Requests<'buf> {
 
                 if mime_type.starts_with("image/") {
                     let response = Response::new_with_binary(StatusCode::JollyGood, file_contents);
-                response.send(stream)?;
+                    response.send(stream)?;
                 } else {
                     let file_contents =
                         read_text_file(&file_path).map_err(|_| ParseError::NotFound(404))?;
@@ -177,13 +176,12 @@ fn read_binary_file(file_path: &Path) -> std::io::Result<Vec<u8>> {
         Err(e) => {
             println!("Error opening file: {}", e); // Log the specific error
             return Err(e);
-        },
+        }
     };
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
     Ok(buffer)
 }
-
 
 pub fn get_mime_type(file_path: &Path) -> String {
     from_path(file_path).first_or_octet_stream().to_string()

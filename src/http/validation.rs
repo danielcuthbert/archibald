@@ -17,7 +17,9 @@ impl Display for ValidationParseError {
         match *self {
             ValidationParseError::InvalidMethod => write!(f, "Invalid method"),
             ValidationParseError::VulnerablePath => write!(f, "Malicious path detected"),
-            ValidationParseError::VulnerableQueryString => write!(f, "Malicious query string detected"),
+            ValidationParseError::VulnerableQueryString => {
+                write!(f, "Malicious query string detected")
+            }
             ValidationParseError::MalformedPath => write!(f, "Malformed path"),
         }
     }
@@ -61,4 +63,3 @@ pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
 
     Ok(())
 }
-
