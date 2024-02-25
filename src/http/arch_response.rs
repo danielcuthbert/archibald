@@ -1,15 +1,5 @@
-/*
-* Archibald: a loyal web server
-* Main response module
-* Author: @danielcuthbert
-*
-* This code serves as the response function.
-*/
-
-// We define a struct to hold all the data we need to send back to the client
 use super::StatusCode;
 use std::io::{Result as IoResult, Write};
-// same as FMT so we call it something else here
 
 #[derive(Debug)]
 pub struct Response {
@@ -35,13 +25,14 @@ impl Response {
         }
     }
 
+    // Sends the response to the client
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
         let content_length = if let Some(body) = &self.body {
             write!(
                 stream,
                 "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n{}",
-                self.status_code,
-                self.status_code.http_status_reason_phrase(),
+                self.status_code as u16, // Convert StatusCode to u16 if necessary
+                self.status_code.http_status_reason_phrase(), // Correct method name
                 body.len(),
                 body
             )?;
@@ -50,19 +41,49 @@ impl Response {
             write!(
                 stream,
                 "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n",
-                self.status_code,
-                self.status_code.http_status_reason_phrase(),
+                self.status_code as u16, // Convert StatusCode to u16 if necessary
+                self.status_code.http_status_reason_phrase(), // Correct method name
                 binary_body.len()
             )?;
             stream.write_all(binary_body)?;
             binary_body.len()
         } else {
+            write!(
+                stream,
+                "HTTP/1.1 {} {}\r\nContent-Length: 0\r\n\r\n",
+                self.status_code as u16, // Convert StatusCode to u16 if necessary
+                self.status_code.http_status_reason_phrase(), // Correct method name
+            )?;
             0
         };
 
         Ok(())
     }
-}
 
-// I used TCPstream before but I think it's better to use the Write trait https://doc.rust-lang.org/std/io/trait.Write.html
-// this way we can send what ever we want and be more generic and not have to worry about the type of data we are sending
+    // New method to send predefined error pages
+    pub fn send_error(status_code: StatusCode, stream: &mut impl Write) -> IoResult<()> {
+        let (content, reason_phrase) = match status_code {
+            StatusCode::NotFound => (
+                include_str!("../../static_content/404.html"), // Adjust path as necessary
+                "Not Found",
+            ),
+            StatusCode::InternalServerError => (
+                include_str!("../../static_content/500.html"), // Adjust path as necessary
+                "Internal Server Error",
+            ),
+            _ => (
+                "An unexpected error has occurred.", // Fallback message
+                "Error",
+            ),
+        };
+
+        write!(
+            stream,
+            "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n{}",
+            status_code as u16, // Convert StatusCode to u16 if necessary
+            reason_phrase,
+            content.len(),
+            content
+        )
+    }
+}

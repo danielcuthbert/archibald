@@ -1,37 +1,27 @@
 use archibald_handler::ArchibaldHandler;
-
 use server::Server;
-
 mod archibald_handler;
 mod http;
 mod server;
 mod settings;
 use settings::Settings;
-
 use log::LevelFilter;
 use simplelog::*;
 use std::fs::File;
 use std::fs::OpenOptions;
 
-// #[derive(Deserialize)]
-// struct ArchibaldConfig {
-//     static_path: String,
-//     default_path: String,
-//     ip: String,
-//     port: u16,
-// }
 
-// #[derive(Deserialize)]
-// struct Data {
-//     config: ArchibaldConfig,
-// }
 
 fn main() {
     // Load settings
     let settings = Settings::new().expect("Config loading failed");
 
-    // Create a log file
-    let _log_file = File::create("archibald_server.log").unwrap();
+    let log_file = OpenOptions::new()
+        .write(true)
+        .append(true)
+        .create(true)
+        .open(&settings.log.file_name) // Use the file name from settings
+        .expect("Unable to open log file");
 
     // Open log file in append mode
     let log_file = OpenOptions::new()
@@ -41,15 +31,23 @@ fn main() {
         .open("archibald_server.log")
         .expect("Unable to open log file");
 
-    // Initialize combined logger
+    // Convert log level from settings to LevelFilter
+    let log_level = match settings.log.level.as_str() {
+        "debug" => LevelFilter::Debug,
+        "info" => LevelFilter::Info,
+        "warn" => LevelFilter::Warn,
+        "error" => LevelFilter::Error,
+        _ => LevelFilter::Info, // Default to Info
+    };
+
     CombinedLogger::init(vec![
         TermLogger::new(
-            LevelFilter::Info,
+            log_level, // Use dynamic level
             Config::default(),
             TerminalMode::Mixed,
             ColorChoice::Auto,
         ),
-        WriteLogger::new(LevelFilter::Info, Config::default(), log_file),
+        WriteLogger::new(log_level, Config::default(), log_file), // Use dynamic level
     ])
     .unwrap();
 

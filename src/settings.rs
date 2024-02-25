@@ -7,11 +7,6 @@ use std::str::FromStr;
 const CONFIG_FILE_PATH: &str = "./orders/archibald.toml";
 
 #[derive(Debug, Deserialize)]
-pub struct Log {
-    pub level: String,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct Server {
     pub address: String,
     pub port: u16,
@@ -40,11 +35,17 @@ impl fmt::Display for ENV {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct LogSettings {
+    pub level: String,
+    pub file_name: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
-    pub log: Log,
-    pub server: Server,
     pub environment: ENV,
+    pub server: Server,
     pub web: WebConfig,
+    pub log: LogSettings, 
 }
 
 impl Settings {
@@ -57,7 +58,6 @@ impl Settings {
 
         // Validate static_root path
         let static_root = PathBuf::from_str(&settings.web.static_root).unwrap();
-
         if !static_root.exists() || !static_root.is_dir() {
             return Err(ConfigError::Message(
                 "Invalid static_root path: path does not exist or is not a directory".to_string(),

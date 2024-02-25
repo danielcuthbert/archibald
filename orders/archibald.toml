@@ -2,8 +2,10 @@
 
 environment = "Development"
 
+
 [log]
-level = "info"
+level = "debug"  # Supports: debug, info, warn, error
+file_name = "archibald_server.log"  # 
 
 [server]
 address = "127.0.0.1"

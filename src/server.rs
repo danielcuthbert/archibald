@@ -1,7 +1,7 @@
 use crate::http::errors::ParseError;
-use crate::http::{arch_requests::Requests, Response};
+use crate::http::{arch_requests::Requests, Response, StatusCode};
 use std::convert::TryFrom;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::TcpListener;
 
 pub trait ServerHandler {
@@ -21,67 +21,42 @@ impl Server {
         }
     }
 
-    pub fn run(self, mut handler: impl ServerHandler) {
+    pub fn run(self, mut handler: impl ServerHandler + Send) {
         println!("[*] Archibald: Starting to serve you on {}", self.address);
 
-        let listener = match TcpListener::bind(&self.address) {
-            Ok(listener) => listener,
-            Err(e) => {
-                println!("Failed to bind to address {}: {}", self.address, e);
-                return;
-            }
-        };
+        let listener = TcpListener::bind(&self.address).expect("Failed to bind to address");
 
-        loop {
-            match listener.accept() {
-                Ok((mut stream, addr)) => {
-                    println!("[*] Archibald: Oh hello {}", addr);
-                    let mut buffer = [0; 1024];
-                    let bytes_read = match stream.read(&mut buffer) {
-                        Ok(size) => size,
-                        Err(e) => {
-                            println!("Error reading from stream: {}", e);
-                            continue;
-                        }
-                    };
-
-                    let human_request = match String::from_utf8(buffer[..bytes_read].to_vec()) {
-                        Ok(req) => req,
-                        Err(e) => {
-                            println!("Invalid UTF-8 sequence: {}", e);
-                            continue;
-                        }
-                    };
-
-                    let human_request = match Requests::try_from(human_request.as_bytes()) {
-                        Ok(req) => req,
-                        Err(e) => {
-                            // You might want to send a bad request response here
-                            println!("Failed to parse request: {}", e);
-                            continue;
-                        }
-                    };
-
-                    match handler.handle_request_internal(&human_request) {
-                        Ok(response) => {
-                            if let Err(e) = response.send(&mut stream) {
-                                println!("Failed to send response: {}", e);
-                            }
-                        }
-                        Err(e) => {
-                            // Handle the bad request
-                            let bad_response = handler.handle_bad_request(&e);
-                            if let Err(err) = bad_response.send(&mut stream) {
-                                println!("Failed to send error response: {}", err);
-                            }
-                        }
-                    }
-                }
+        for stream in listener.incoming() {
+            let mut stream = match stream {
+                Ok(s) => s,
                 Err(e) => {
-                    println!("Failed to accept connection: {}", e);
+                    println!("Failed to establish a connection: {}", e);
                     continue;
                 }
-            }
+            };
+
+            let mut buffer = [0; 1024];
+            match stream.read(&mut buffer) {
+                Ok(_) => {},
+                Err(e) => {
+                    println!("Error reading from the stream: {}", e);
+                    let response = handler.handle_bad_request(&ParseError::InvalidRequest);
+                    let _ = response.send(&mut stream);
+                    continue;
+                }
+            };
+
+            let request = match Requests::try_from(&buffer[..]) {
+                Ok(req) => req,
+                Err(e) => {
+                    let response = handler.handle_bad_request(&e);
+                    let _ = response.send(&mut stream);
+                    continue;
+                }
+            };
+
+            let response = handler.handle_request_internal(&request).unwrap_or_else(|e| handler.handle_bad_request(&e));
+            let _ = response.send(&mut stream);
         }
     }
 }
