@@ -3,45 +3,28 @@ use crate::http::methods::Allowedmethods;
 use crate::http::Response; // Import Response
 use crate::http::StatusCode; // Import StatusCode
 use mime_guess::from_path;
-
 use std::fs::File;
-
 use std::io::prelude::*;
-
 use std::path::Path;
 
 mod validation {
-    use crate::http::{errors::ParseError, validation};
+    use crate::http::errors::ParseError;
     use std::{fs, io::ErrorKind, path::Path};
 
-    pub fn sanitize_input(input: &str) -> String {
-        input
-            .chars()
-            .filter(|&c| {
-                c.is_alphanumeric()
-                    || c == '/'
-                    || c == '.'
-                    || c == '-'
-                    || c == '_'
-                    || c.is_whitespace()
-            })
-            .collect()
+    pub fn sanitise_input(input: &str) -> String {
+        input.chars().filter(|&c| c.is_alphanumeric() || c == '/' || c == '.' || c == '-' || c == '_' || c.is_whitespace()).collect()
     }
 
-    pub fn validate_input() -> Result<(), ParseError> {
-        let input = ""; // Add the missing input variable
-        let sanitized_path = validation::sanitize_input(input);
+    pub fn validate_input(input: &str) -> Result<(), ParseError> {
+        let sanitised_path = sanitise_input(input);
 
-        if !Path::new(&sanitized_path).exists() {
-            let file_error = fs::metadata(&sanitized_path).err().unwrap();
+        if !Path::new(&sanitised_path).exists() {
+            let file_error = fs::metadata(&sanitised_path).err().unwrap();
 
             match file_error.kind() {
                 ErrorKind::NotFound => return Err(ParseError::NotFound(404)),
                 ErrorKind::PermissionDenied => {
-                    return Err(ParseError::IOError(format!(
-                        "File permission error: {}",
-                        file_error.to_string(),
-                    )))
+                    return Err(ParseError::IOError(format!("File permission error: {}", file_error.to_string())))
                 }
                 _ => return Err(ParseError::IOError(file_error.to_string())),
             }
@@ -84,26 +67,9 @@ impl<'buf> Requests<'buf> {
     pub fn method(&self) -> &Allowedmethods {
         &self.method
     }
-    pub fn sanitize_input(input: &str) -> String {
-        input
-            .chars()
-            .filter(|&c| {
-                c.is_alphanumeric()
-                    || c == '/'
-                    || c == '.'
-                    || c == '-'
-                    || c == '_'
-                    || c.is_whitespace()
-            })
-            .collect()
-    }
+
     pub fn query_string(&self) -> Option<&str> {
         self.query_string
-    }
-
-    pub fn validate_input(&self) -> Result<(), ParseError> {
-        let _sanitized_path = validation::sanitize_input(self.path());
-        validation::validate_input()
     }
 
     pub fn set_file_contents(&mut self, contents: Vec<u8>) {
@@ -115,29 +81,30 @@ impl<'buf> Requests<'buf> {
     }
 
     pub fn handle_request(&mut self, stream: &mut impl Write) -> Result<(), ParseError> {
-        self.validate_input()?;
+        let sanitised_path = validation::sanitise_input(self.path());
 
-        let sanitized_path = validation::sanitize_input(self.path());
         if self.method == Allowedmethods::GET {
-            if sanitized_path.starts_with("/static") {
-                let file_path = Path::new(&sanitized_path);
-                let file_contents =
-                    read_binary_file(&file_path).map_err(|_| ParseError::NotFound(404))?;
-                let mime_type = get_mime_type(&file_path);
+            let file_path = Path::new(&sanitised_path);
 
-                if mime_type.starts_with("image/") {
-                    let response = Response::new_with_binary(StatusCode::JollyGood, file_contents);
-                    response.send(stream)?;
-                } else {
-                    let file_contents =
-                        read_text_file(&file_path).map_err(|_| ParseError::NotFound(404))?;
+            match read_binary_file(file_path) {
+                Ok(file_contents) => {
+                    let mime_type = get_mime_type(file_path);
 
-                    let response = Response::new(StatusCode::JollyGood, Some(file_contents));
+                    let response = if mime_type.starts_with("image/") {
+                        Response::new_with_binary(StatusCode::JollyGood, file_contents)
+                    } else {
+                        Response::new(StatusCode::JollyGood, Some(String::from_utf8_lossy(&file_contents).to_string()))
+                            .add_header("Content-Type", &mime_type)
+                    };
                     response.send(stream)?;
+                },
+                Err(_) => {
+                    Response::send_error(StatusCode::NotFound).send(stream)?;
                 }
-            } else {
-                // Handle other paths
             }
+        } else {
+            // Handle other paths or methods
+            Response::send_error(StatusCode::BadRequest).send(stream)?;
         }
 
         Ok(())
@@ -171,13 +138,7 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
 }
 
 fn read_binary_file(file_path: &Path) -> std::io::Result<Vec<u8>> {
-    let mut file = match File::open(file_path) {
-        Ok(file) => file,
-        Err(e) => {
-            println!("Error opening file: {}", e); // Log the specific error
-            return Err(e);
-        }
-    };
+    let mut file = File::open(file_path)?;
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer)?;
     Ok(buffer)
@@ -185,10 +146,6 @@ fn read_binary_file(file_path: &Path) -> std::io::Result<Vec<u8>> {
 
 pub fn get_mime_type(file_path: &Path) -> String {
     from_path(file_path).first_or_octet_stream().to_string()
-}
-
-fn parse_request(request: &str) -> Option<(&str, &str)> {
-    request.split_once(' ').or_else(|| request.split_once('\r'))
 }
 
 fn read_text_file(file_path: &Path) -> std::io::Result<String> {

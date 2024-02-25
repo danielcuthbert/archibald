@@ -28,17 +28,17 @@ impl Display for ValidationParseError {
 impl Error for ValidationParseError {}
 
 // Sanitization function using regular expressions
-pub fn sanitize_input(input: &str) -> String {
+pub fn sanitise_input(input: &str) -> String {
     println!("Original path: {}", input);
 
     let re = Regex::new(r"[^\w\s./-]").expect("Invalid regex pattern");
-    let sanitized = re.replace_all(input, "").to_string();
+    let sanitised = re.replace_all(input, "").to_string();
 
-    let final_sanitized = sanitized.replace("../", "").replace("/../", "");
+    let final_sanitised = sanitised.replace("../", "").replace("/../", "");
 
-    println!("Sanitized path: {}", final_sanitized);
+    println!("sanitised path: {}", final_sanitised);
 
-    final_sanitized
+    final_sanitised
 }
 
 // Validation function using string methods and regular expressions

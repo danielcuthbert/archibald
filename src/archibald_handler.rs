@@ -23,15 +23,15 @@ impl ArchibaldHandler {
     }
 
     fn read_file(&self, file_path: &str) -> Result<Vec<u8>, StatusCode> {
-        let sanitized_path = validation::sanitize_input(file_path);
-        debug!("Sanitized path: {}", sanitized_path); // Debugging purpose
+        let sanitised_path = validation::sanitise_input(file_path);
+        debug!("sanitised path: {}", sanitised_path); // Debugging purpose
 
-        if sanitized_path.contains("..") {
-            warn!("Directory traversal attempt detected: {}", sanitized_path);
+        if sanitised_path.contains("..") {
+            warn!("Directory traversal attempt detected: {}", sanitised_path);
             return Err(StatusCode::FORBIDDEN);
         }
 
-        let path = format!("{}/{}", self.static_path, sanitized_path);
+        let path = format!("{}/{}", self.static_path, sanitised_path);
         debug!("Attempting to read file at path: {}", path); // Debugging purpose
 
         match fs::canonicalize(&path) {
