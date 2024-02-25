@@ -1,3 +1,4 @@
+```mermaid
 graph TD;
     A[main.rs: TcpListener Setup] -->|bind & listen| B[Accept Connection];
     B -->|read stream| C[Parse Request];
@@ -20,6 +21,7 @@ graph TD;
     class J found;
     class F exists;
     class K,L success;
+```
 
 
 
