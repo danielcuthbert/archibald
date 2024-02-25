@@ -4,19 +4,17 @@ mod archibald_handler;
 mod http;
 mod server;
 mod settings;
-use settings::Settings;
 use log::LevelFilter;
+use settings::Settings;
 use simplelog::*;
-use std::fs::File;
+
 use std::fs::OpenOptions;
-
-
 
 fn main() {
     // Load settings
     let settings = Settings::new().expect("Config loading failed");
 
-    let log_file = OpenOptions::new()
+    let _log_file = OpenOptions::new()
         .write(true)
         .append(true)
         .create(true)

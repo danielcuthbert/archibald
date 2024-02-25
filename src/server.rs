@@ -1,7 +1,7 @@
 use crate::http::errors::ParseError;
-use crate::http::{arch_requests::Requests, Response, StatusCode};
+use crate::http::{arch_requests::Requests, Response};
 use std::convert::TryFrom;
-use std::io::{Read, Write};
+use std::io::Read;
 use std::net::TcpListener;
 
 pub trait ServerHandler {
@@ -37,7 +37,7 @@ impl Server {
 
             let mut buffer = [0; 1024];
             match stream.read(&mut buffer) {
-                Ok(_) => {},
+                Ok(_) => {}
                 Err(e) => {
                     println!("Error reading from the stream: {}", e);
                     let response = handler.handle_bad_request(&ParseError::InvalidRequest);
@@ -55,7 +55,9 @@ impl Server {
                 }
             };
 
-            let response = handler.handle_request_internal(&request).unwrap_or_else(|e| handler.handle_bad_request(&e));
+            let response = handler
+                .handle_request_internal(&request)
+                .unwrap_or_else(|e| handler.handle_bad_request(&e));
             let _ = response.send(&mut stream);
         }
     }

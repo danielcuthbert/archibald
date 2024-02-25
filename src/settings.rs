@@ -45,7 +45,7 @@ pub struct Settings {
     pub environment: ENV,
     pub server: Server,
     pub web: WebConfig,
-    pub log: LogSettings, 
+    pub log: LogSettings,
 }
 
 impl Settings {

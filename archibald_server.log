@@ -1,15 +1,126 @@
-11:34:53 [INFO] Received request: METHOD GET, PATH '/index.html'
-11:34:53 [INFO] Sanitized path: index.html
-11:34:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/index.html
-11:34:53 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/index.html
-11:34:53 [INFO] Serving file: index.html
-11:34:53 [INFO] Received request: METHOD GET, PATH '/static_content/style.css'
-11:34:53 [INFO] Sanitized path: static_contentstyle.css
-11:34:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/static_contentstyle.css
-11:34:53 [WARN] Error reading file: No such file or directory (os error 2)
-11:34:53 [WARN] File not found or access denied: static_content/style.css
-11:35:16 [INFO] Received request: METHOD GET, PATH '/etc/passwd'
-11:35:16 [INFO] Sanitized path: etcpasswd
-11:35:16 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/etcpasswd
-11:35:16 [WARN] Error reading file: No such file or directory (os error 2)
-11:35:16 [WARN] File not found or access denied: etc/passwd
+12:27:17 [INFO] Received request: METHOD GET, PATH '/'
+12:27:17 [INFO] Sanitized path: index.html
+12:27:17 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/index.html
+12:27:17 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/index.html
+12:27:17 [INFO] Received request: METHOD GET, PATH '/style.css'
+12:27:17 [INFO] Sanitized path: style.css
+12:27:17 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/style.css
+12:27:17 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/style.css
+12:27:17 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:27:17 [INFO] Sanitized path: script.js
+12:27:17 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:27:17 [WARN] Error reading file: No such file or directory (os error 2)
+12:27:17 [WARN] File not found or access denied: script.js
+12:27:17 [INFO] Received request: METHOD GET, PATH '/img/logo.jpg'
+12:27:17 [INFO] Sanitized path: img/logo.jpg
+12:27:17 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:27:17 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:27:17 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:27:17 [INFO] Sanitized path: script.js
+12:27:17 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:27:17 [WARN] Error reading file: No such file or directory (os error 2)
+12:27:17 [WARN] File not found or access denied: script.js
+12:27:43 [INFO] Received request: METHOD GET, PATH '/?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E'
+12:27:43 [INFO] Sanitized path: usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:27:43 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:27:43 [WARN] Error reading file: No such file or directory (os error 2)
+12:27:43 [WARN] File not found or access denied: ?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E
+12:37:10 [INFO] Received request: METHOD GET, PATH '/'
+12:37:10 [INFO] Sanitized path: index.html
+12:37:10 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/index.html
+12:37:10 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/index.html
+12:37:10 [INFO] Received request: METHOD GET, PATH '/style.css'
+12:37:10 [INFO] Sanitized path: style.css
+12:37:10 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/style.css
+12:37:10 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/style.css
+12:37:10 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:37:10 [INFO] Sanitized path: script.js
+12:37:10 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:37:10 [WARN] Error reading file: No such file or directory (os error 2)
+12:37:10 [WARN] File not found or access denied: script.js
+12:37:10 [INFO] Received request: METHOD GET, PATH '/img/logo.jpg'
+12:37:10 [INFO] Sanitized path: img/logo.jpg
+12:37:10 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:37:10 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:37:10 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:37:10 [INFO] Sanitized path: script.js
+12:37:10 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:37:10 [WARN] Error reading file: No such file or directory (os error 2)
+12:37:10 [WARN] File not found or access denied: script.js
+12:37:16 [INFO] Received request: METHOD GET, PATH '/?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E'
+12:37:17 [INFO] Sanitized path: usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:37:17 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:37:17 [WARN] Error reading file: No such file or directory (os error 2)
+12:37:17 [WARN] File not found or access denied: ?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E
+12:41:30 [INFO] Received request: METHOD GET, PATH '/'
+12:41:30 [INFO] Sanitized path: index.html
+12:41:30 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/index.html
+12:41:30 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/index.html
+12:41:30 [INFO] Received request: METHOD GET, PATH '/style.css'
+12:41:30 [INFO] Sanitized path: style.css
+12:41:30 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/style.css
+12:41:30 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/style.css
+12:41:30 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:41:30 [INFO] Sanitized path: script.js
+12:41:30 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:41:30 [WARN] Error reading file: No such file or directory (os error 2)
+12:41:30 [WARN] File not found or access denied: script.js
+12:41:30 [INFO] Received request: METHOD GET, PATH '/img/logo.jpg'
+12:41:30 [INFO] Sanitized path: img/logo.jpg
+12:41:30 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:41:30 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:41:30 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:41:30 [INFO] Sanitized path: script.js
+12:41:30 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:41:30 [WARN] Error reading file: No such file or directory (os error 2)
+12:41:30 [WARN] File not found or access denied: script.js
+12:41:34 [INFO] Received request: METHOD GET, PATH '/?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E'
+12:41:34 [INFO] Sanitized path: usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:41:34 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:41:34 [WARN] Error reading file: No such file or directory (os error 2)
+12:41:34 [WARN] File not found or access denied: ?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E
+12:46:53 [INFO] Received request: METHOD GET, PATH '/'
+12:46:53 [INFO] Sanitized path: index.html
+12:46:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/index.html
+12:46:53 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/index.html
+12:46:53 [INFO] Received request: METHOD GET, PATH '/style.css'
+12:46:53 [INFO] Sanitized path: style.css
+12:46:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/style.css
+12:46:53 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/style.css
+12:46:53 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:46:53 [INFO] Sanitized path: script.js
+12:46:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:46:53 [INFO] Received request: METHOD GET, PATH '/img/logo.jpg'
+12:46:53 [INFO] Sanitized path: img/logo.jpg
+12:46:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:46:53 [INFO] Canonical path: /Users/daniel/Code/archibald/static_content/img/logo.jpg
+12:46:53 [INFO] Received request: METHOD GET, PATH '/script.js'
+12:46:53 [INFO] Sanitized path: script.js
+12:46:53 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/script.js
+12:46:57 [INFO] Received request: METHOD GET, PATH '/?username=daniel%3Cscript%3Ealert%28%27hello%27%29%3C%2Fscript%3E'
+12:46:57 [INFO] Sanitized path: usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:46:57 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/usernamedaniel3Cscript3Ealert2827hello27293C2Fscript3E
+12:48:18 [INFO] Received request: METHOD GET, PATH '/fdsffsfdsfd'
+12:48:18 [INFO] Sanitized path: fdsffsfdsfd
+12:48:18 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd
+12:48:21 [INFO] Received request: METHOD GET, PATH '/fdsffsfdsfd'
+12:48:21 [INFO] Sanitized path: fdsffsfdsfd
+12:48:21 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd
+12:48:21 [INFO] Received request: METHOD GET, PATH '/favicon.ico'
+12:48:21 [INFO] Sanitized path: favicon.ico
+12:48:21 [INFO] Attempting to read file at path: /Users/daniel/Code/archibald/static_content/favicon.ico
+12:52:30 [INFO] Received request: METHOD GET, PATH '/fdsffsfdsfd'
+12:52:30 [DEBUG] (1) archibald::archibald_handler: Sanitized path: fdsffsfdsfd
+12:52:30 [DEBUG] (1) archibald::archibald_handler: Attempting to read file at path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd
+12:52:30 [WARN] Error resolving file path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd (No such file or directory (os error 2))
+12:52:31 [INFO] Received request: METHOD GET, PATH '/fdsffsfdsfd'
+12:52:31 [DEBUG] (1) archibald::archibald_handler: Sanitized path: fdsffsfdsfd
+12:52:31 [DEBUG] (1) archibald::archibald_handler: Attempting to read file at path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd
+12:52:31 [WARN] Error resolving file path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd (No such file or directory (os error 2))
+12:55:57 [INFO] Received request: METHOD GET, PATH '/fdsffsfdsfd'
+12:55:57 [DEBUG] (1) archibald::archibald_handler: Sanitized path: fdsffsfdsfd
+12:55:57 [DEBUG] (1) archibald::archibald_handler: Attempting to read file at path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd
+12:55:57 [WARN] Error resolving file path: /Users/daniel/Code/archibald/static_content/fdsffsfdsfd (No such file or directory (os error 2))
+12:55:57 [DEBUG] (1) archibald::archibald_handler: Sanitized path: 404.html
+12:55:57 [DEBUG] (1) archibald::archibald_handler: Attempting to read file at path: /Users/daniel/Code/archibald/static_content/404.html
+12:55:57 [DEBUG] (1) archibald::archibald_handler: Canonical path: /Users/daniel/Code/archibald/static_content/404.html

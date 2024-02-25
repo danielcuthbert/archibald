@@ -27,7 +27,7 @@ impl Response {
 
     // Sends the response to the client
     pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
-        let content_length = if let Some(body) = &self.body {
+        let _content_length = if let Some(body) = &self.body {
             write!(
                 stream,
                 "HTTP/1.1 {} {}\r\nContent-Length: {}\r\n\r\n{}",

@@ -3,11 +3,11 @@ use crate::http::methods::Allowedmethods;
 use crate::http::Response; // Import Response
 use crate::http::StatusCode; // Import StatusCode
 use mime_guess::from_path;
-use std::fs;
+
 use std::fs::File;
-use std::io;
+
 use std::io::prelude::*;
-use std::io::ErrorKind;
+
 use std::path::Path;
 
 mod validation {
@@ -102,7 +102,7 @@ impl<'buf> Requests<'buf> {
     }
 
     pub fn validate_input(&self) -> Result<(), ParseError> {
-        let sanitized_path = validation::sanitize_input(self.path());
+        let _sanitized_path = validation::sanitize_input(self.path());
         validation::validate_input()
     }
 

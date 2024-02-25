@@ -1,3 +1,47 @@
+graph TD;
+    A[main.rs: TcpListener Setup] -->|bind & listen| B[Accept Connection];
+    B -->|read stream| C[Parse Request];
+    C -->|from_utf8 & parse| D[arch_requests.rs: Requests::try_from];
+    D -->|sanitize & validate| E[ArchibaldHandler: handle_request];
+    E --> F{File Exists?};
+    F -->|Yes| G[ArchibaldHandler: read_file];
+    F -->|No| J[Serve 404.html];
+    G -->|Read & Serve File| K[Create Response];
+    J -->|Read 404.html & Serve| L[Create 404 Response];
+    K --> M[Send Response];
+    L --> M;
+    M --> N[Log Result];
+    N --> O[Wait for Next Request];
+
+    classDef found fill:#f9f,stroke:#333,stroke-width:2px;
+    classDef exists fill:#bbf,stroke:#333,stroke-width:4px;
+    classDef success fill:#bfb,stroke:#333,stroke-width:2px;
+
+    class J found;
+    class F exists;
+    class K,L success;
+
+
+
+### Detailed Explanation:
+
+- **`main.rs: TcpListener Setup`**: Initializes the `TcpListener` to bind to a specific address and start listening for incoming connections.
+- **`Accept Connection`**: Once a connection is accepted, the server begins to process the incoming request.
+- **`Parse Request`**: Reads the incoming stream to parse the HTTP request.
+- **`arch_requests.rs: Requests::try_from`**: Uses the `Requests::try_from` method to convert the raw request data into a structured `Requests` object. This involves decoding from UTF-8 and parsing the HTTP request components.
+- **`ArchibaldHandler: handle_request`**: The `handle_request` method in `ArchibaldHandler` takes over, sanitizing the request path and validating the request.
+- **`File Exists?`**: Decision point to check if the requested file exists in the server's file system.
+- **`ArchibaldHandler: read_file`**: If the file exists, `read_file` method is called to read the file's contents.
+- **`Serve 404.html`**: If the file does not exist, the server attempts to serve a `404.html` page.
+- **`Create Response` & `Create 404 Response`**: Based on the outcome, a response is created either by serving the requested file or the `404.html` page.
+- **`Send Response`**: The response is then sent back to the client.
+- **`Log Result`**: The server logs the result of the request handling.
+- **`Wait for Next Request`**: The server then waits for the next incoming request.
+
+This enhanced diagram and explanation provide a clearer view of the function-level interactions within your Rust web server application, focusing on how requests are processed and responses are generated, including the handling of 404 errors.
+
+
+
 ## Tracking the Flow of Data
 
 When hunting for bugs, I've always jotted down how data enters a binary/application and watch the flow of that data as i use/abuse said binary/application. This gives me the inputs I need to concentrate on and try and abuse. It's often a labour intensive phase but I feel incredibly import. I get why those shipping products do not offer this, but it would be cool if they did.

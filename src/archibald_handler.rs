@@ -1,8 +1,8 @@
-use crate::http::{arch_requests::Requests, arch_response::Response, statuscodes::StatusCode};
 use crate::http::methods::Allowedmethods;
 use crate::http::validation;
+use crate::http::{arch_requests::Requests, arch_response::Response, statuscodes::StatusCode};
 use crate::server::ServerHandler;
-use log::{info, warn, debug};
+use log::{debug, info, warn};
 use mime_guess::from_path;
 use std::fs;
 use std::path::Path;
@@ -14,8 +14,8 @@ pub struct ArchibaldHandler {
 impl ArchibaldHandler {
     pub fn new<T: Into<String>>(static_path: T) -> Self {
         let static_path = static_path.into();
-        let canonical_static_path = fs::canonicalize(&static_path)
-            .expect(&format!("Invalid static path: {}", static_path));
+        let canonical_static_path =
+            fs::canonicalize(&static_path).expect(&format!("Invalid static path: {}", static_path));
 
         Self {
             static_path: canonical_static_path.to_string_lossy().to_string(),
@@ -43,24 +43,28 @@ impl ArchibaldHandler {
                         Err(e) => {
                             warn!("Error reading file: {} ({})", path, e);
                             Err(StatusCode::NotFound)
-                        },
+                        }
                     }
                 } else {
                     warn!("Potential security risk detected: {}", file_path);
                     Err(StatusCode::FORBIDDEN)
                 }
-            },
+            }
             Err(e) => {
                 warn!("Error resolving file path: {} ({})", path, e);
                 Err(StatusCode::NotFound)
-            },
+            }
         }
     }
 }
 
 impl ServerHandler for ArchibaldHandler {
     fn handle_request(&mut self, request: &Requests) -> Response {
-        info!("Received request: METHOD {:?}, PATH '{}'", request.method(), request.path());
+        info!(
+            "Received request: METHOD {:?}, PATH '{}'",
+            request.method(),
+            request.path()
+        );
 
         match request.method() {
             Allowedmethods::GET => {
@@ -76,32 +80,48 @@ impl ServerHandler for ArchibaldHandler {
                 match self.read_file(file_path) {
                     Ok(content) => {
                         if mime_type.starts_with("text/") || mime_type == "application/javascript" {
-                            Response::new(StatusCode::JollyGood, Some(String::from_utf8_lossy(&content).to_string()))
+                            Response::new(
+                                StatusCode::JollyGood,
+                                Some(String::from_utf8_lossy(&content).to_string()),
+                            )
                         } else {
                             Response::new_with_binary(StatusCode::JollyGood, content)
                         }
-                    },
+                    }
                     Err(status) => match status {
-                        StatusCode::NotFound => {
-                            match self.read_file("404.html") {
-                                Ok(content) => Response::new(StatusCode::NotFound, Some(String::from_utf8_lossy(&content).to_string())),
-                                Err(_) => Response::new(StatusCode::NotFound, Some("404 Not Found".to_string())),
-                            }
+                        StatusCode::NotFound => match self.read_file("404.html") {
+                            Ok(content) => Response::new(
+                                StatusCode::NotFound,
+                                Some(String::from_utf8_lossy(&content).to_string()),
+                            ),
+                            Err(_) => Response::new(
+                                StatusCode::NotFound,
+                                Some("404 Not Found".to_string()),
+                            ),
                         },
-                        StatusCode::FORBIDDEN => Response::new(StatusCode::FORBIDDEN, Some("Access Denied".to_string())),
-                        _ => {
-                            match self.read_file("500.html") {
-                                Ok(content) => Response::new(StatusCode::InternalServerError, Some(String::from_utf8_lossy(&content).to_string())),
-                                Err(_) => Response::new(StatusCode::InternalServerError, Some("Internal Server Error".to_string())),
-                            }
+                        StatusCode::FORBIDDEN => {
+                            Response::new(StatusCode::FORBIDDEN, Some("Access Denied".to_string()))
+                        }
+                        _ => match self.read_file("500.html") {
+                            Ok(content) => Response::new(
+                                StatusCode::InternalServerError,
+                                Some(String::from_utf8_lossy(&content).to_string()),
+                            ),
+                            Err(_) => Response::new(
+                                StatusCode::InternalServerError,
+                                Some("Internal Server Error".to_string()),
+                            ),
                         },
                     },
                 }
-            },
+            }
             _ => {
                 warn!("Method not allowed: {:?}", request.method());
-                Response::new(StatusCode::BadRequest, Some("Method Not Allowed".to_string()))
-            },
+                Response::new(
+                    StatusCode::BadRequest,
+                    Some("Method Not Allowed".to_string()),
+                )
+            }
         }
     }
 
@@ -109,12 +129,18 @@ impl ServerHandler for ArchibaldHandler {
         warn!("Bad request encountered");
         // Attempt to serve a custom bad request page or return a simple message
         match self.read_file("400.html") {
-            Ok(content) => Response::new(StatusCode::BadRequest, Some(String::from_utf8_lossy(&content).to_string())),
+            Ok(content) => Response::new(
+                StatusCode::BadRequest,
+                Some(String::from_utf8_lossy(&content).to_string()),
+            ),
             Err(_) => Response::new(StatusCode::BadRequest, Some("Bad Request".to_string())),
         }
     }
 
-    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, crate::http::errors::ParseError> {
+    fn handle_request_internal(
+        &mut self,
+        request: &Requests,
+    ) -> Result<Response, crate::http::errors::ParseError> {
         Ok(self.handle_request(request))
     }
 }
