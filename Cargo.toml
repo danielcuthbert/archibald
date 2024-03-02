@@ -16,5 +16,6 @@ serde_derive = "1.0.171"
 toml = "0.5.10"
 config = "0.12"
 simplelog = "0.12.1"
+urlencoding = "2.1"
 
 

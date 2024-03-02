@@ -7,6 +7,7 @@ use log::{debug, info, warn};
 use mime_guess::from_path;
 use std::fs;
 use std::path::Path;
+use urlencoding;
 
 pub struct ArchibaldHandler {
     static_path: String,
@@ -101,14 +102,41 @@ impl ServerHandler for ArchibaldHandler {
                 }
             }
             Allowedmethods::POST => {
-                // General handling for POST requests
-                info!("Handling POST request for {}", request.path);
+                if let Some(body) = &request.body {
+                    // Parse form data
+                    let lossy_body = String::from_utf8_lossy(body); // Fix: Create a longer-lived value
 
-                // Placeholder logic for POST request handling
-                Response::new(
-                    StatusCode::JollyGood,
-                    Some("POST request received".to_string()),
-                )
+                    let decoded_data = match urlencoding::decode(&lossy_body) {
+                        Ok(data) => data,
+                        Err(_) => {
+                            // Handle decoding error (e.g., log and return appropriate response)
+                            return Response::new(
+                                StatusCode::BadRequest,
+                                Some("Error processing form data".to_string()),
+                            );
+                        }
+                    };
+                    let name_value = decoded_data.split('&').find(|kv| kv.starts_with("name="));
+
+                    // Extract name
+                    let name = match name_value {
+                        Some(kv) => kv.split('=').nth(1).unwrap(),
+                        None => "Unnamed Visitor",
+                    };
+
+                    // Create and return response with name
+                    return Response::new(
+                        StatusCode::JollyGood,
+                        Some(format!("Hello, {}!", name)),
+                    )
+                    .add_header("Content-Type", "text/html"); // Example header
+                } else {
+                    // Handle empty body case (optional)
+                    return Response::new(
+                        StatusCode::BadRequest,
+                        Some("Empty request body".to_string()),
+                    );
+                }
             }
             _ => {
                 warn!("Method not allowed: {:?}", request.method);
@@ -135,3 +163,5 @@ impl ServerHandler for ArchibaldHandler {
         Ok(self.handle_request(request))
     }
 }
+
+
