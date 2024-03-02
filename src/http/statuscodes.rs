@@ -13,8 +13,9 @@ pub enum StatusCode {
     /// This is where we store all the codes we want to send
     JollyGood = 200,
     BadRequest = 400,
-    FORBIDDEN = 403,
+    Forbidden = 403,
     NotFound = 404,
+    MethodNotAllowed = 405,
     IAmATeapot = 418,
     InternalServerError = 500,
 }
@@ -35,8 +36,9 @@ impl StatusCode {
             // self is a receiver of a method so we can just match on it
             Self::JollyGood => "Jolly Good",
             Self::BadRequest => "Bad Request",
-            Self::FORBIDDEN => "Forbidden",
+            Self::Forbidden => "Forbidden",
             Self::NotFound => "Not Found",
+            Self::MethodNotAllowed => "Method Not Allowed",
             Self::IAmATeapot => "I am a teapot",
             Self::InternalServerError => "Internal Server Error",
         }

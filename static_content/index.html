@@ -23,7 +23,8 @@
 
         <h1>How May I Serve You?</h1>
 
-        <form id="user-form" class="user-form">
+        <form id="user-form" class="user-form" action="/submit" method="post">
+
             <h2>What's your name?</h2>
             <label for="username">Enter your name:</label>
             <input type="text" id="username" name="username" class="form-control" required>
@@ -47,7 +48,7 @@
             <ul class="list">
                 <li>Added option to edit settings via <i>orders/archibald.toml</i> config file</li>
                 <li>Working on better error reporting (a WIP)</li>
-                <li>Added a pest_grammar.pest file for validation</li>
+                <li>Added detailed logging in archibald.toml config file</li>
             </ul>
         </section>
     </main>

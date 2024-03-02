@@ -49,7 +49,8 @@ impl Response {
         }
 
         // Content-Length is determined and set here
-        let content_length = self.body.as_ref().map_or(0, |b| b.len()) + self.binary_body.as_ref().map_or(0, |b| b.len());
+        let content_length = self.body.as_ref().map_or(0, |b| b.len())
+            + self.binary_body.as_ref().map_or(0, |b| b.len());
         write!(stream, "Content-Length: {}\r\n\r\n", content_length)?;
 
         if let Some(body) = &self.body {
@@ -78,7 +79,6 @@ impl Response {
             ),
         };
 
-        Response::new(status_code, Some(content))
-            .add_header("Content-Type", &content_type)
+        Response::new(status_code, Some(content)).add_header("Content-Type", &content_type)
     }
 }

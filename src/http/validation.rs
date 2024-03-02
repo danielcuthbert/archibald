@@ -42,10 +42,9 @@ pub fn sanitise_input(input: &str) -> String {
 }
 
 // Validation function using string methods and regular expressions
-// Validation function using string methods and regular expressions
 pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
-    let path = request.path();
-    let query_string = request.query_string();
+    let path = request.path;
+    let query_string = request.query_string;
 
     // Simple path validation using string methods
     if path.contains("..") || path.contains("/./") || path.contains("//") {
