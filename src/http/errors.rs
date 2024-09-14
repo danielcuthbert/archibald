@@ -13,7 +13,11 @@ pub enum ParseError {
     InvalidBody,
     InvalidEncoding,
     InvalidProtocol,
+    InvalidPath,
+    InternalServerError,
+    MethodNotAllowed,
     IOError(String),
+    // Add other variants as needed
 }
 
 impl Display for ParseError {
@@ -22,14 +26,15 @@ impl Display for ParseError {
         match self {
             InvalidRequest => write!(f, "Invalid Request"),
             InvalidMethod => write!(f, "Invalid Method"),
-            // ... other cases ...
+            InvalidHeader => write!(f, "Invalid Header"),
+            InvalidBody => write!(f, "Invalid Body"),
+            InvalidEncoding => write!(f, "Invalid Encoding"),
+            InvalidProtocol => write!(f, "Invalid Protocol"),
+            InvalidPath => write!(f, "Invalid Path"),
+            InternalServerError => write!(f, "Internal Server Error"),
+            MethodNotAllowed => write!(f, "Method Not Allowed"),
+            NotFound(code) => write!(f, "Not Found ({})", code),
             IOError(message) => write!(f, "IO Error: {}", message),
-            NotFound(_) => todo!(),
-            InvalidHeader => todo!(),
-            InvalidBody => todo!(),
-            InvalidEncoding => todo!(),
-            InvalidProtocol => todo!(),
-            // ... other cases ...
         }
     }
 }

@@ -11,7 +11,7 @@ use std::fmt::{Display, Formatter, Result as FmtResult}; //renaming result as i 
 #[repr(u16)] //treat all of these as u16s
 pub enum StatusCode {
     /// This is where we store all the codes we want to send
-    JollyGood = 200,
+    OK = 200,
     BadRequest = 400,
     Forbidden = 403,
     NotFound = 404,
@@ -31,10 +31,10 @@ impl Into<u16> for StatusCode {
 
 impl StatusCode {
     /// The implementation of the StatusCode enum
-    pub fn http_status_reason_phrase(&self) -> &str {
+    pub fn reason_phrase(&self) -> &str {
         match self {
             // self is a receiver of a method so we can just match on it
-            Self::JollyGood => "Jolly Good",
+            Self::OK => "Jolly Good",
             Self::BadRequest => "Bad Request",
             Self::Forbidden => "Forbidden",
             Self::NotFound => "Not Found",

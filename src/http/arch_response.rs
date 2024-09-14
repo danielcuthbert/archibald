@@ -1,84 +1,60 @@
-use super::StatusCode;
-use std::io::{Result as IoResult, Write};
+// src/http/arch_response.rs
 
-#[derive(Debug)]
+use crate::http::statuscodes::StatusCode;
+use std::collections::HashMap;
+use std::io::Write;
+
 pub struct Response {
-    status_code: StatusCode,
-    body: Option<String>,
-    binary_body: Option<Vec<u8>>,
-    headers: Vec<(String, String)>, // Added field to store headers
+    pub status_code: StatusCode,
+    pub headers: HashMap<String, String>,
+    pub body: Vec<u8>,
 }
 
 impl Response {
-    pub fn new(status_code: StatusCode, body: Option<String>) -> Self {
+    /// Creates a new `Response` with the given status code, body, and content type.
+    pub fn new(status_code: StatusCode, body: Vec<u8>, content_type: &str) -> Self {
+        let mut headers = HashMap::new();
+        headers.insert("Content-Type".to_string(), content_type.to_string());
+        headers.insert("Content-Length".to_string(), body.len().to_string());
+        headers.insert("Connection".to_string(), "close".to_string());
         Response {
             status_code,
+            headers,
             body,
-            binary_body: None,
-            headers: Vec::new(), // Initialize headers as empty
         }
     }
 
-    pub fn new_with_binary(status_code: StatusCode, binary_body: Vec<u8>) -> Self {
-        Response {
-            status_code,
-            body: None,
-            binary_body: Some(binary_body),
-            headers: Vec::new(), // Initialize headers as empty
-        }
-    }
-
-    // Method to add a header to the response
-    pub fn add_header(mut self, name: &str, value: &str) -> Self {
-        self.headers.push((name.to_string(), value.to_string()));
+    /// Adds a header to the response.
+    pub fn add_header(mut self, key: &str, value: &str) -> Self {
+        self.headers.insert(key.to_string(), value.to_string());
         self
     }
 
-    // Sends the response to the client, including headers
-    pub fn send(&self, stream: &mut impl Write) -> IoResult<()> {
+    /// Creates a new `Response` for text content.
+    pub fn new_with_text(status_code: StatusCode, body: &str, content_type: &str) -> Self {
+        Self::new(status_code, body.as_bytes().to_vec(), content_type)
+    }
+
+    /// Sends the HTTP response over the provided writable stream.
+    pub fn send(&self, stream: &mut impl Write) -> std::io::Result<()> {
+        // Write the status line
         write!(
             stream,
             "HTTP/1.1 {} {}\r\n",
             self.status_code as u16,
-            self.status_code.http_status_reason_phrase(),
+            self.status_code.reason_phrase()
         )?;
 
-        // Iterate over headers and write them to the stream
-        for (name, value) in &self.headers {
-            write!(stream, "{}: {}\r\n", name, value)?;
+        // Write the headers
+        for (key, value) in &self.headers {
+            write!(stream, "{}: {}\r\n", key, value)?;
         }
 
-        // Content-Length is determined and set here
-        let content_length = self.body.as_ref().map_or(0, |b| b.len())
-            + self.binary_body.as_ref().map_or(0, |b| b.len());
-        write!(stream, "Content-Length: {}\r\n\r\n", content_length)?;
+        // End of headers
+        write!(stream, "\r\n")?;
 
-        if let Some(body) = &self.body {
-            write!(stream, "{}", body)?;
-        } else if let Some(binary_body) = &self.binary_body {
-            stream.write_all(binary_body)?;
-        }
-
+        // Write the body
+        stream.write_all(&self.body)?;
         Ok(())
-    }
-
-    // Adjusted send_error method to fit with the new structure
-    pub fn send_error(status_code: StatusCode) -> Self {
-        let (content, content_type) = match status_code {
-            StatusCode::NotFound => (
-                include_str!("../../static_content/404.html").to_string(),
-                "text/html; charset=utf-8",
-            ),
-            StatusCode::InternalServerError => (
-                include_str!("../../static_content/500.html").to_string(),
-                "text/html; charset=utf-8",
-            ),
-            _ => (
-                "An unexpected error has occurred.".to_string(),
-                "text/plain; charset=utf-8",
-            ),
-        };
-
-        Response::new(status_code, Some(content)).add_header("Content-Type", &content_type)
     }
 }

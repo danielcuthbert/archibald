@@ -1,6 +1,7 @@
+// src/archibald_handlers.rs
+
 use crate::http::errors::ParseError;
-use crate::http::methods::Allowedmethods;
-use crate::http::validation;
+use crate::http::methods::AllowedMethods;
 use crate::http::{arch_requests::Requests, arch_response::Response, statuscodes::StatusCode};
 use crate::server::ServerHandler;
 use log::{debug, info, warn};
@@ -25,15 +26,11 @@ impl ArchibaldHandler {
     }
 
     fn read_file(&self, file_path: &str) -> Result<Vec<u8>, StatusCode> {
-        let sanitised_path = validation::sanitise_input(file_path);
-        debug!("sanitised path: {}", sanitised_path); // Debugging purpose
+        // Sanitize input path
+        let sanitized_path = file_path.trim_start_matches('/');
+        debug!("Sanitized path: {}", sanitized_path); // Debugging purpose
 
-        if sanitised_path.contains("..") {
-            warn!("Directory traversal attempt detected: {}", sanitised_path);
-            return Err(StatusCode::Forbidden);
-        }
-
-        let path = format!("{}/{}", self.static_path, sanitised_path);
+        let path = format!("{}/{}", self.static_path, sanitized_path);
         debug!("Attempting to read file at path: {}", path); // Debugging purpose
 
         match fs::canonicalize(&path) {
@@ -68,81 +65,98 @@ impl ServerHandler for ArchibaldHandler {
         );
 
         match request.method {
-            Allowedmethods::GET => {
+            AllowedMethods::GET => {
                 let file_path = if request.path == "/" {
                     "index.html"
                 } else {
                     &request.path[1..]
                 };
 
-                let full_path = format!("{}/{}", self.static_path, file_path);
-                let path = Path::new(&full_path);
+                let path = Path::new(file_path);
                 let mime_type = from_path(path).first_or_octet_stream().to_string();
 
                 match self.read_file(file_path) {
                     Ok(content) => {
                         if mime_type.starts_with("text/") || mime_type == "application/javascript" {
-                            Response::new(
-                                StatusCode::JollyGood,
-                                Some(String::from_utf8_lossy(&content).to_string()),
+                            Response::new_with_text(
+                                StatusCode::OK,
+                                &String::from_utf8_lossy(&content),
+                                &mime_type,
                             )
                             .add_header("Content-Type", &mime_type)
                         } else {
-                            Response::new_with_binary(StatusCode::JollyGood, content)
+                            Response::new(StatusCode::OK, content, &mime_type)
                                 .add_header("Content-Type", &mime_type)
                         }
                     }
                     Err(status) => match status {
-                        StatusCode::NotFound => Response::new(StatusCode::NotFound, None),
-                        StatusCode::Forbidden => {
-                            Response::new(StatusCode::Forbidden, Some("Access Denied".to_string()))
-                        }
-                        _ => Response::new(StatusCode::InternalServerError, None),
+                        StatusCode::NotFound => Response::new_with_text(
+                            StatusCode::NotFound,
+                            "Not Found",
+                            "text/plain",
+                        ),
+                        StatusCode::Forbidden => Response::new_with_text(
+                            StatusCode::Forbidden,
+                            "Access Denied",
+                            "text/plain",
+                        ),
+                        _ => Response::new_with_text(
+                            StatusCode::InternalServerError,
+                            "Internal Server Error",
+                            "text/plain",
+                        ),
                     },
                 }
             }
-            Allowedmethods::POST => {
+            AllowedMethods::POST => {
                 if let Some(body) = &request.body {
                     // Parse form data
-                    let lossy_body = String::from_utf8_lossy(body); // Fix: Create a longer-lived value
+                    let lossy_body = String::from_utf8_lossy(body);
 
                     let decoded_data = match urlencoding::decode(&lossy_body) {
                         Ok(data) => data,
                         Err(_) => {
-                            // Handle decoding error (e.g., log and return appropriate response)
-                            return Response::new(
+                            // Handle decoding error
+                            return Response::new_with_text(
                                 StatusCode::BadRequest,
-                                Some("Error processing form data".to_string()),
+                                "Error processing form data",
+                                "text/plain",
                             );
                         }
                     };
-                    let name_value = decoded_data.split('&').find(|kv| kv.starts_with("name="));
+
+                    let name_value = decoded_data
+                        .split('&')
+                        .find(|kv| kv.starts_with("name="));
 
                     // Extract name
                     let name = match name_value {
-                        Some(kv) => kv.split('=').nth(1).unwrap(),
+                        Some(kv) => kv.split('=').nth(1).unwrap_or("Unnamed Visitor"),
                         None => "Unnamed Visitor",
                     };
 
                     // Create and return response with name
-                    return Response::new(
-                        StatusCode::JollyGood,
-                        Some(format!("Hello, {}!", name)),
+                    Response::new_with_text(
+                        StatusCode::OK,
+                        &format!("Hello, {}!", name),
+                        "text/html",
                     )
-                    .add_header("Content-Type", "text/html"); // Example header
+                    .add_header("Content-Type", "text/html") // Example header
                 } else {
-                    // Handle empty body case (optional)
-                    return Response::new(
+                    // Handle empty body case
+                    Response::new_with_text(
                         StatusCode::BadRequest,
-                        Some("Empty request body".to_string()),
-                    );
+                        "Empty request body",
+                        "text/plain",
+                    )
                 }
             }
             _ => {
                 warn!("Method not allowed: {:?}", request.method);
-                Response::new(
+                Response::new_with_text(
                     StatusCode::MethodNotAllowed,
-                    Some("Method Not Allowed".to_string()),
+                    "Method Not Allowed",
+                    "text/plain",
                 )
             }
         }
@@ -153,15 +167,14 @@ impl ServerHandler for ArchibaldHandler {
         match self.read_file("400.html") {
             Ok(content) => Response::new(
                 StatusCode::BadRequest,
-                Some(String::from_utf8_lossy(&content).to_string()),
+                content,
+                "text/html",
             ),
-            Err(_) => Response::new(StatusCode::BadRequest, Some("Bad Request".to_string())),
+            Err(_) => Response::new_with_text(
+                StatusCode::BadRequest,
+                "Bad Request",
+                "text/plain",
+            ),
         }
     }
-
-    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, ParseError> {
-        Ok(self.handle_request(request))
-    }
 }
-
-

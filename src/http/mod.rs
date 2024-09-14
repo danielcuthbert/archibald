@@ -8,5 +8,4 @@ pub mod query_string;
 pub mod arch_response;
 pub use arch_response::Response;
 pub mod statuscodes;
-pub use statuscodes::StatusCode;
 pub mod validation;

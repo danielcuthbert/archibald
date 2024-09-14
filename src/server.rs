@@ -1,13 +1,14 @@
+// src/server.rs
+
 use crate::http::errors::ParseError;
 use crate::http::{arch_requests::Requests, Response};
 use std::convert::TryFrom;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::net::TcpListener;
 
 pub trait ServerHandler {
     fn handle_request(&mut self, request: &Requests) -> Response;
     fn handle_bad_request(&mut self, e: &ParseError) -> Response;
-    fn handle_request_internal(&mut self, request: &Requests) -> Result<Response, ParseError>;
 }
 
 pub struct Server {
@@ -35,30 +36,44 @@ impl Server {
                 }
             };
 
-            let mut buffer = [0; 1024];
-            match stream.read(&mut buffer) {
-                Ok(_) => {}
-                Err(e) => {
-                    println!("Error reading from the stream: {}", e);
-                    let response = handler.handle_bad_request(&ParseError::InvalidRequest);
-                    let _ = response.send(&mut stream);
-                    continue;
-                }
-            };
-
-            let request = match Requests::try_from(&buffer[..]) {
-                Ok(req) => req,
-                Err(e) => {
-                    let response = handler.handle_bad_request(&e);
-                    let _ = response.send(&mut stream);
-                    continue;
-                }
-            };
-
-            let response = handler
-                .handle_request_internal(&request)
-                .unwrap_or_else(|e| handler.handle_bad_request(&e));
-            let _ = response.send(&mut stream);
+            // Handle the connection
+            if let Err(e) = Self::handle_connection(&mut stream, &mut handler) {
+                println!("Failed to handle connection: {}", e);
+            }
         }
+    }
+
+    fn handle_connection(
+        stream: &mut (impl Read + Write),
+        handler: &mut impl ServerHandler,
+    ) -> std::io::Result<()> {
+        let mut buffer = [0; 1024];
+        let bytes_read = stream.read(&mut buffer)?;
+
+        if bytes_read == 0 {
+            // Handle client disconnect if necessary
+            return Ok(());
+        }
+
+        // Log the number of bytes read for debugging
+        log::debug!("Bytes read from stream: {}", bytes_read);
+
+        // Pass only the valid bytes to the parser
+        let request_bytes = &buffer[..bytes_read];
+
+        let request = match Requests::try_from(request_bytes) {
+            Ok(req) => req,
+            Err(e) => {
+                log::warn!("Failed to parse request: {:?}", e);
+                let response = handler.handle_bad_request(&e);
+                response.send(stream)?;
+                return Ok(());
+            }
+        };
+
+        let response = handler.handle_request(&request);
+        response.send(stream)?;
+
+        Ok(())
     }
 }

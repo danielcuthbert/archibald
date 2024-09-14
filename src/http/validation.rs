@@ -1,64 +1,59 @@
-use crate::http::arch_requests::Requests;
-use regex::Regex;
-use std::error::Error;
-use std::fmt::{Display, Formatter};
+// src/http/validation.rs
 
-// Simplified validation error enum
-#[derive(Debug)]
-pub enum ValidationParseError {
-    InvalidMethod,
-    MalformedPath,
-    VulnerablePath,
-    VulnerableQueryString,
-}
+use crate::http::errors::ParseError;
+use log::debug;
+use percent_encoding::percent_decode_str;
+use std::path::{Component, Path, PathBuf};
 
-impl Display for ValidationParseError {
-    fn fmt(&self, f: &mut Formatter) -> std::fmt::Result {
-        match *self {
-            ValidationParseError::InvalidMethod => write!(f, "Invalid method"),
-            ValidationParseError::VulnerablePath => write!(f, "Malicious path detected"),
-            ValidationParseError::VulnerableQueryString => {
-                write!(f, "Malicious query string detected")
+pub fn validate_input(input: &str) -> Result<PathBuf, ParseError> {
+    debug!("Validating input path: {}", input);
+
+    // URL-decode the input path
+    let decoded_input = percent_decode_str(input)
+        .decode_utf8()
+        .map_err(|_| ParseError::InvalidEncoding)?;
+    let decoded_input = decoded_input.as_ref();
+
+    debug!("Decoded input path: {}", decoded_input);
+
+    // Start with an empty path
+    let mut path = PathBuf::new();
+
+    // Sanitize the input path by filtering out dangerous components
+    for component in Path::new(decoded_input).components() {
+        match component {
+            Component::Normal(name) => {
+                // Append valid path components
+                path.push(name);
             }
-            ValidationParseError::MalformedPath => write!(f, "Malformed path"),
-        }
-    }
-}
-
-impl Error for ValidationParseError {}
-
-// Sanitization function using regular expressions
-pub fn sanitise_input(input: &str) -> String {
-    println!("Original path: {}", input);
-
-    let re = Regex::new(r"[^\w\s./-]").expect("Invalid regex pattern");
-    let sanitised = re.replace_all(input, "").to_string();
-
-    let final_sanitised = sanitised.replace("../", "").replace("/../", "");
-
-    println!("sanitised path: {}", final_sanitised);
-
-    final_sanitised
-}
-
-// Validation function using string methods and regular expressions
-pub fn validate_input(request: &Requests) -> Result<(), ValidationParseError> {
-    let path = request.path;
-    let query_string = request.query_string;
-
-    // Simple path validation using string methods
-    if path.contains("..") || path.contains("/./") || path.contains("//") {
-        return Err(ValidationParseError::VulnerablePath);
-    }
-
-    // Regex-based query string validation (Corrected regex pattern)
-    if let Some(query_string) = query_string {
-        let vulnerable_chars = Regex::new(r#"[\";]"#).expect("Invalid regex pattern");
-
-        if vulnerable_chars.is_match(query_string) {
-            return Err(ValidationParseError::VulnerableQueryString);
+            Component::RootDir => {
+                // Skip the root directory component to create a relative path
+                // This allows paths starting with '/' without including it in the PathBuf
+                continue;
+            }
+            Component::CurDir => {
+                // Ignore the current directory component '.'
+                continue;
+            }
+            Component::ParentDir => {
+                // Reject attempts to navigate to parent directories
+                debug!("Invalid path component (ParentDir): {:?}", component);
+                return Err(ParseError::InvalidPath);
+            }
+            _ => {
+                // Reject any other components (e.g., prefix, verbatim)
+                debug!("Invalid path component: {:?}", component);
+                return Err(ParseError::InvalidPath);
+            }
         }
     }
 
-    Ok(())
+    // If the path is empty after processing, default to "index.html"
+    if path.as_os_str().is_empty() {
+        path.push("index.html");
+    }
+
+    debug!("Sanitized path: {:?}", path);
+
+    Ok(path)
 }

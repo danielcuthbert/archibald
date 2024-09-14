@@ -17,5 +17,6 @@ toml = "0.5.10"
 config = "0.12"
 simplelog = "0.12.1"
 urlencoding = "2.1"
+percent-encoding = "2.3"
 
 
