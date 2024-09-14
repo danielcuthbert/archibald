@@ -90,11 +90,9 @@ impl ServerHandler for ArchibaldHandler {
                         }
                     }
                     Err(status) => match status {
-                        StatusCode::NotFound => Response::new_with_text(
-                            StatusCode::NotFound,
-                            "Not Found",
-                            "text/plain",
-                        ),
+                        StatusCode::NotFound => {
+                            Response::new_with_text(StatusCode::NotFound, "Not Found", "text/plain")
+                        }
                         StatusCode::Forbidden => Response::new_with_text(
                             StatusCode::Forbidden,
                             "Access Denied",
@@ -125,9 +123,7 @@ impl ServerHandler for ArchibaldHandler {
                         }
                     };
 
-                    let name_value = decoded_data
-                        .split('&')
-                        .find(|kv| kv.starts_with("name="));
+                    let name_value = decoded_data.split('&').find(|kv| kv.starts_with("name="));
 
                     // Extract name
                     let name = match name_value {
@@ -165,16 +161,8 @@ impl ServerHandler for ArchibaldHandler {
     fn handle_bad_request(&mut self, _e: &crate::http::errors::ParseError) -> Response {
         warn!("Bad request encountered");
         match self.read_file("400.html") {
-            Ok(content) => Response::new(
-                StatusCode::BadRequest,
-                content,
-                "text/html",
-            ),
-            Err(_) => Response::new_with_text(
-                StatusCode::BadRequest,
-                "Bad Request",
-                "text/plain",
-            ),
+            Ok(content) => Response::new(StatusCode::BadRequest, content, "text/html"),
+            Err(_) => Response::new_with_text(StatusCode::BadRequest, "Bad Request", "text/plain"),
         }
     }
 }

@@ -1,40 +1,40 @@
 // src/http/arch_requests.rs
 
+use crate::http::arch_response::Response;
 use crate::http::errors::ParseError;
 use crate::http::methods::AllowedMethods;
-use crate::http::arch_response::Response;
 use crate::http::statuscodes::StatusCode;
+use log::{debug, warn};
+use mime_guess::from_path;
+use percent_encoding::percent_decode_str;
 use std::collections::HashMap;
 use std::convert::TryFrom;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::path::{Component, Path, PathBuf};
-use log::{debug, warn};
-use mime_guess::from_path;
-use percent_encoding::percent_decode_str;
 
 mod validation {
     use super::ParseError;
-    use std::path::{Component, Path, PathBuf};
     use log::debug;
     use percent_encoding::percent_decode_str;
+    use std::path::{Component, Path, PathBuf};
     use urlencoding::decode;
 
     /// Validates and sanitizes the input path to prevent path traversal attacks.
     pub fn validate_input(input: &str) -> Result<PathBuf, ParseError> {
         debug!("Validating input path: {}", input);
-    
+
         // URL-decode the input path
         let decoded_input = percent_decode_str(input)
             .decode_utf8()
             .map_err(|_| ParseError::InvalidEncoding)?;
         let decoded_input = decoded_input.as_ref();
-    
+
         debug!("Decoded input path: {}", decoded_input);
-    
+
         // Start with an empty path
         let mut path = PathBuf::new();
-    
+
         // Sanitize the input path by filtering out dangerous components
         for component in Path::new(decoded_input).components() {
             match component {
@@ -63,14 +63,14 @@ mod validation {
                 }
             }
         }
-    
+
         // If the path is empty after processing, default to "index.html"
         if path.as_os_str().is_empty() {
             path.push("index.html");
         }
-    
+
         debug!("Sanitized path: {:?}", path);
-    
+
         Ok(path)
     }
 }
@@ -98,8 +98,8 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
         debug!("Request string: {}", request_str);
 
         // Split request into lines using CRLF
-        // The split("\r\n") method accurately splits the HTTP request into lines at each CRLF sequence, 
-        // which is the standard line ending in HTTP requests. 
+        // The split("\r\n") method accurately splits the HTTP request into lines at each CRLF sequence,
+        // which is the standard line ending in HTTP requests.
         // This avoids any trailing \r characters in the lines, which can interfere with parsing headers and request lines.
         let mut lines = request_str.split("\r\n");
 
@@ -141,12 +141,14 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
                 return Err(ParseError::InvalidHeader);
             }
         }
-        
-        
 
         // Collect the body if present
         let body = lines.collect::<Vec<&str>>().join("\n");
-        let body = if body.is_empty() { None } else { Some(body.as_bytes().to_vec()) };
+        let body = if body.is_empty() {
+            None
+        } else {
+            Some(body.as_bytes().to_vec())
+        };
 
         Ok(Requests {
             path,
@@ -161,7 +163,6 @@ impl<'buf> TryFrom<&'buf [u8]> for Requests<'buf> {
         })
     }
 }
-
 
 impl<'buf> Requests<'buf> {
     // Additional methods can be added here
@@ -193,11 +194,7 @@ pub fn handle_request(request_bytes: &[u8], stream: &mut impl Write) -> Result<(
             Ok(())
         }
         _ => {
-            let response = Response::new(
-                StatusCode::MethodNotAllowed,
-                Vec::new(),
-                "text/plain",
-            );
+            let response = Response::new(StatusCode::MethodNotAllowed, Vec::new(), "text/plain");
             response.send(stream)?;
             Ok(())
         }
